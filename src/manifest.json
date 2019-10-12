@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Moly Tab Menu",
+  "version": "1.0.0",
+
+  "description": "Switch tabs quickly with pop-up list.",
+
+  "icons": {
+    "16": "icons/16.png",
+    "128": "icons/128.png"
+  },
+
+  "content_scripts": [{ "matches": ["*://*/*"], "js": ["scripts/content.ts"] }]
+}

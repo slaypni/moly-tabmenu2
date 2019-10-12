@@ -1,0 +1,10 @@
+{
+  "name": "moly-tabmenu-2",
+  "version": "1.0.0",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-web-extension": "^1.5.2",
+    "typescript": "^3.7.0-beta"
+  }
+}
