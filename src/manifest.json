@@ -10,5 +10,11 @@
     "128": "icons/128.png"
   },
 
-  "content_scripts": [{ "matches": ["*://*/*"], "js": ["scripts/content.ts"] }]
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["scripts/content.tsx"],
+      "css": ["styles/content.styl"]
+    }
+  ]
 }

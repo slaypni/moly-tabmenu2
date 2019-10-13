@@ -5,6 +5,16 @@
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-web-extension": "^1.5.2",
+    "stylus": "^0.54.7",
     "typescript": "^3.7.0-beta"
+  },
+  "dependencies": {
+    "hotkeys-js": "^3.7.2",
+    "preact": "^10.0.0"
+  },
+  "alias": {
+    "react": "preact/compat",
+    "react-dom/test-utils": "preact/test-utils",
+    "react-dom": "preact/compat"
   }
 }
