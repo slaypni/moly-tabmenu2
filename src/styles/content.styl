@@ -1,5 +1,125 @@
-#molytabmenu-app
-  background-color: aqua
+border-radius = 8px
+font-size = 14px
 
-  .app
-    font-size: 20px
+#molytabmenu-app
+  position: fixed
+  z-index: 2147483647
+  top: 0
+  left: 0
+  margin: 0
+  padding: 0
+  width: 100vw
+  height: auto
+  overflow-x: hidden
+  overflow-y: auto
+  font-size: font-size
+  pointer-events: none
+  background-color: rgba(0, 0, 0, 0)
+
+  --color: rgba(0, 0, 0, 0.87)
+  --bg-color: white
+  --border-color: gray
+  --line-color: rgba(0, 0, 0, 0.87)
+  --highlighted-line-color: rgba(0, 255, 255, 0.87)
+  --search-bg-color: rgba(0, 0, 0, 0.13)
+
+  .molytabmenu-container
+    top: 0
+    margin: 0 auto
+    padding: 8px 10px
+    width: 400px
+    background-color: var(--bg-color)
+    border: 1px solid var(--border-color)
+    border-radius: border-radius
+    pointer-events: auto
+
+  .molytabmenu-top
+    display: flex
+    flex-flow: row nowrap
+    align-items: center
+    height: 28px
+    margin-bottom: 4px
+
+    .molytabmenu-search
+      margin-right: 10px
+
+  .molytabmenu-label
+    font-size: font-size - 2px
+    color: gray
+
+  .molytabmenu-search
+    box-sizing: border-box
+    flex-grow: 1
+    display inline-flex
+    cursor: text
+
+    input
+      flex-grow: 1
+      color: var(--color)
+      padding: 8px 10px
+      height: 1em
+      border: 0
+      border-radius: border-radius
+      box-sizing: content-box
+      background-color: var(--search-bg-color)
+
+      &:focus
+        outline: 0
+
+  .molytabmenu-category
+    display: flex
+    flex-flow: row nowrap
+    justify-content: space-between
+    margin-bottom: 8px
+
+    .molytabmenu-panel
+      width: 32.5%
+      height: 28px
+      line-height: 28px
+      font-size: font-size
+      text-align: center
+      border-bottom: 1px solid var(--line-color)
+      cursor: pointer
+
+      &.activated
+        cursor: default
+        border-bottom: 1px solid var(--highlighted-line-color)
+
+  .molytabmenu-select
+    display: inline
+    margin-left: 8px
+
+    select
+      font-size: font-size
+      color: var(--color)
+      cursor: pointer
+      user-select: none
+      box-sizing: content-box
+      padding: 6px 0 2px
+      border: 0
+      border-bottom: 1px solid var(--line-color)
+      border-radius: 0
+      width: 100px
+      height: 1em
+      background: none
+      -webkit-appearance: none
+      -moz-appearance: none
+
+    svg
+      color: var(--color)
+      transform: translate(-14px, 0.4em)
+      position: absolute
+      pointer-events: none
+
+      width: 1em
+      height: 1em
+      display: inline-block
+      user-select: none
+
+  .molytabmenu-tabs
+    .molytabmenu-tab
+      &.selected
+        background-color: yellow
+    .molytabmenu-favicon
+      width: 16px
+      height: 16px

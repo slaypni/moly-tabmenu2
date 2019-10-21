@@ -8,5 +8,6 @@ yarn parcel watch --no-hmr src/manifest.json
 Build
 
 ```
-yarn parcel build src/manifest.json
+rm -r dist
+yarn parcel build --experimental-scope-hoisting src/manifest.json
 ```

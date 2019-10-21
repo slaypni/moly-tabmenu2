@@ -16,5 +16,14 @@
       "js": ["scripts/content.tsx"],
       "css": ["styles/content.styl"]
     }
-  ]
+  ],
+
+  "background": {
+    "scripts": ["scripts/background.ts"],
+    "persistent": false
+  },
+
+  "options_page": "options.html",
+
+  "permissions": ["tabs", "storage", "sessions", "history"]
 }
