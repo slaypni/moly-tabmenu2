@@ -1,5 +1,4 @@
-import { OrderedSet } from "immutable";
-import { groupBy, pick } from "lodash-es";
+import { groupBy, pick, union, without } from "lodash-es";
 import { browser } from "webextension-polyfill-ts";
 
 import { Method, Sort, Message, Panel, Tab, Config } from "./types";
@@ -42,14 +41,12 @@ async function setState(name: string, value: any): Promise<void> {
   return await browser.storage.local.set({ [`st-${name}`]: value });
 }
 
-async function getActivatedTabIds(): Promise<OrderedSet<number>> {
-  return OrderedSet(
-    (await getState(State.ActivatedTabIds)) || ([] as Array<number>) // todo: should use ??
-  );
+async function getActivatedTabIds(): Promise<number[]> {
+  return (await getState(State.ActivatedTabIds)) || ([] as number[]); // todo: should use ??
 }
 
-async function setActivatedTabIds(value: OrderedSet<number>): Promise<void> {
-  return setState(State.ActivatedTabIds, value.toArray());
+async function setActivatedTabIds(value: number[]): Promise<void> {
+  return setState(State.ActivatedTabIds, value);
 }
 
 browser.runtime.onStartup.addListener(async () => {
@@ -62,12 +59,12 @@ browser.runtime.onStartup.addListener(async () => {
 
 browser.tabs.onActivated.addListener(async activeInfo => {
   setActivatedTabIds(
-    OrderedSet([activeInfo.tabId]).concat(await getActivatedTabIds())
+    union([activeInfo.tabId]).concat(await getActivatedTabIds())
   );
 });
 
 browser.tabs.onRemoved.addListener(async tabId => {
-  setActivatedTabIds((await getActivatedTabIds()).delete(tabId));
+  setActivatedTabIds(without(await getActivatedTabIds(), tabId));
 });
 
 browser.runtime.onMessage.addListener(async (message: Message, sender) => {
@@ -90,9 +87,11 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 
         const getTabsInActiveOrder = async (): Promise<T[]> => {
           const tabsMap = getTabsMap();
-          return (await getActivatedTabIds())
-            .concat(tabs.map(tab => tab.id))
-            .toArray()
+          return union(
+            ((await getActivatedTabIds()) as (number | string)[]).concat(
+              tabs.map(tab => tab.id)
+            )
+          )
             .map(id => {
               return tabsMap.get(id);
             })
@@ -106,11 +105,11 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
             return await getTabsInActiveOrder();
           case Sort.ActiveHost:
             const tabsByHosts = groupBy(tabs, tab => new URL(tab.url).hostname);
-            const hosts = OrderedSet(
+            const hosts = union(
               (await getTabsInActiveOrder()).map(
                 tab => new URL(tab.url).hostname
               )
-            ).toArray();
+            );
             return hosts.flatMap(host => {
               return [...tabsByHosts[host]].sort((a, b) => comp(a.url, b.url));
             });
