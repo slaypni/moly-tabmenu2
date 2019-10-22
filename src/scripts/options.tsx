@@ -61,9 +61,9 @@ function App() {
   const [moveDownKeybinds, setMoveDownKeybinds] = useState([]);
   const [moveLeftKeybinds, setMoveLeftKeybinds] = useState([]);
   const [moveRightKeybinds, setMoveRightKeybinds] = useState([]);
-  const [focusOnSearch, setFocusOnSearch] = useState([]);
-  const [selectNextSortOption, setSelectNextSortOption] = useState([]);
-  const [selectPrevSortOption, setSelectPrevSortOption] = useState([]);
+  const [focusOnSearchKeybinds, setFocusOnSearchKeybinds] = useState([]);
+  const [selectNextSortKeybinds, setSelectNextSortKeybinds] = useState([]);
+  const [selectPrevSortKeybinds, setSelectPrevSortKeybinds] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -74,12 +74,14 @@ function App() {
       setMoveDownKeybinds(cnf["cnf-moveDownKeybinds"] || moveDownKeybinds);
       setMoveLeftKeybinds(cnf["cnf-moveLeftKeybinds"] || moveLeftKeybinds);
       setMoveRightKeybinds(cnf["cnf-moveRightKeybinds"] || moveRightKeybinds);
-      setFocusOnSearch(cnf["cnf-focusOnSearch"] || focusOnSearch);
-      setSelectNextSortOption(
-        cnf["cnf-selectNextSortOption"] || selectNextSortOption
+      setFocusOnSearchKeybinds(
+        cnf["cnf-focusOnSearchKeybinds"] || focusOnSearchKeybinds
       );
-      setSelectPrevSortOption(
-        cnf["cnf-selectPrevSortOption"] || selectPrevSortOption
+      setSelectNextSortKeybinds(
+        cnf["cnf-selectNextSortKeybinds"] || selectNextSortKeybinds
+      );
+      setSelectPrevSortKeybinds(
+        cnf["cnf-selectPrevSortKeybinds"] || selectPrevSortKeybinds
       );
     })();
   }, []);
@@ -91,9 +93,9 @@ function App() {
     moveDownKeybinds,
     moveLeftKeybinds,
     moveRightKeybinds,
-    focusOnSearch,
-    selectNextSortOption,
-    selectPrevSortOption
+    focusOnSearchKeybinds,
+    selectNextSortKeybinds,
+    selectPrevSortKeybinds
   })) {
     useEffect(() => {
       browser.storage.local.set({ [`cnf-${key}`]: value });
@@ -187,20 +189,20 @@ function App() {
           },
           {
             label: "Focus on search box",
-            keybinds: focusOnSearch,
-            setKeybinds: setFocusOnSearch,
+            keybinds: focusOnSearchKeybinds,
+            setKeybinds: setFocusOnSearchKeybinds,
             mod: false
           },
           {
             label: "Select next sort option",
-            keybinds: selectNextSortOption,
-            setKeybinds: setSelectNextSortOption,
+            keybinds: selectNextSortKeybinds,
+            setKeybinds: setSelectNextSortKeybinds,
             mod: false
           },
           {
             label: "Select previous sort option",
-            keybinds: selectPrevSortOption,
-            setKeybinds: setSelectPrevSortOption,
+            keybinds: selectPrevSortKeybinds,
+            setKeybinds: setSelectPrevSortKeybinds,
             mod: false
           }
         ].map(({ label, keybinds, setKeybinds, mod }) => (

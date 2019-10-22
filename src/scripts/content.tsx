@@ -2,15 +2,9 @@ import hotkeys from "hotkeys-js";
 import { h, render, JSX } from "preact";
 import { useEffect, useState, useRef } from "preact/hooks";
 
-import { Method, Sort, Message, Panel, Tab } from "./types";
-
-const modKey = "ctrl";
-const moveDownKey = "w";
-const moveUpKey = "shift+w";
+import { Method, Sort, Message, Panel, Tab, Config } from "./types";
 
 function App() {
-  console.log("App");
-
   const [isActive, setIsActive] = useState<boolean>(false);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [sort, setSort] = useState<Sort | null>(null);
@@ -19,16 +13,17 @@ function App() {
   const [index, setIndex] = useState<number>(0);
   const selectedTabElementRef = useRef(null);
   const [isMouseMode, setIsMouseMode] = useState<boolean>(false);
+  const [config, setConfig] = useState<Config | null>(null);
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
     if (isActive) {
       switch (type) {
         case "keydown":
-          console.log("modKey keydown");
+          // console.log("modKey keydown");
           break;
         case "keyup":
-          if (!hotkeys.isPressed(modKey) && !isMouseMode) {
+          if (!hotkeys.isPressed(config.modKey) && !isMouseMode) {
             selectedTabElementRef.current.click(); // todo: should use current?.click()
           }
           break;
@@ -99,24 +94,36 @@ function App() {
   }, [panel, sort, query]);
 
   useEffect(() => {
+    if (config == null) return;
+
     hotkeys.filter = () => {
       return true;
     };
 
-    hotkeys(`*`, { keyup: true }, event => {
-      console.log(`modKey ${hotkeys.isPressed("ctrl")}`);
+    hotkeys("*", { keyup: true }, event => {
+      // console.log(`modKey ${hotkeys.isPressed("ctrl")}`);
       onAnyKeyRef.current(event.type);
     });
 
-    hotkeys(`${modKey}+${moveDownKey}`, () => {
-      console.log("moveDown");
-      onMoveKeyRef.current(1);
-    });
+    hotkeys(
+      config.moveDownKeybinds.map(key => `${config.modKey}+${key}`).join(","),
+      () => {
+        // console.log("moveDown");
+        onMoveKeyRef.current(1);
+      }
+    );
 
-    hotkeys(`${modKey}+${moveUpKey}`, () => {
-      console.log("moveUp");
-      onMoveKeyRef.current(-1);
-    });
+    hotkeys(
+      config.moveUpKeybinds.map(key => `${config.modKey}+${key}`).join(","),
+      () => {
+        // console.log("moveUp");
+        onMoveKeyRef.current(-1);
+      }
+    );
+  }, [config]);
+
+  useEffect(() => {
+    chrome.runtime.sendMessage({ method: Method.GetConfig }, setConfig);
   }, []);
 
   const getPanelElement = (p: Panel, name: string): JSX.Element => {

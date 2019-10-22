@@ -2,9 +2,7 @@ import { OrderedSet } from "immutable";
 import { groupBy, pick } from "lodash-es";
 import { browser } from "webextension-polyfill-ts";
 
-import { Method, Sort, Message, Panel, Tab } from "./types";
-
-// let activatedTabIds: OrderedSet<number> = OrderedSet();
+import { Method, Sort, Message, Panel, Tab, Config } from "./types";
 
 enum State {
   ActivatedTabIds = "ActivatedTabIds",
@@ -13,6 +11,24 @@ enum State {
 }
 
 const MAX_HISTORY_RESULT = 1000;
+
+async function getConfig(): Promise<Config> {
+  const cnf = await browser.storage.local.get();
+  return Object.assign(
+    {},
+    ...[
+      "mouseModButton",
+      "modKey",
+      "moveUpKeybinds",
+      "moveDownKeybinds",
+      "moveLeftKeybinds",
+      "moveRightKeybinds",
+      "focusOnSearchKeybinds",
+      "selectNextSortKeybinds",
+      "selectPrevSortKeybinds"
+    ].map(k => ({ [k]: cnf[`cnf-${k}`] }))
+  );
+}
 
 async function clearState(name: string): Promise<void> {
   await browser.storage.local.remove(`st-${name}`);
@@ -179,5 +195,8 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
     case Method.SetLastSort:
       setState(State.LastSort, message.body);
       return;
+
+    case Method.GetConfig:
+      return await getConfig();
   }
 });

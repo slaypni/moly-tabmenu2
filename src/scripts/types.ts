@@ -4,7 +4,8 @@ export enum Method {
   GetLastPanel,
   SetLastPanel,
   GetLastSort,
-  SetLastSort
+  SetLastSort,
+  GetConfig
 }
 
 export enum Sort {
@@ -34,4 +35,16 @@ export interface Tab {
   title?: string;
   url?: string;
   favIconUrl?: string;
+}
+
+export interface Config {
+  mouseModButton: string | null;
+  modKey: string;
+  moveUpKeybinds: string[];
+  moveDownKeybinds: string[];
+  moveLeftKeybinds: string[];
+  moveRightKeybinds: string[];
+  focusOnSearchKeybinds: string[];
+  selectNextSortKeybinds: string[];
+  selectPrevSortKeybinds: string[];
 }
