@@ -47,14 +47,23 @@ const keyNames = {
   222: "'"
 };
 
+enum Mod {
+  Meta = "command",
+  Ctrl = "ctrl",
+  Alt = "alt",
+  Shift = "shift"
+}
+
 function App() {
   const [mouseModButton, setMouseModButton] = useState<string | null>(null);
-  const [modKey, setModKey] = useState<string | null>("ctrl");
+  const [modKey, setModKey] = useState<string | null>(Mod.Ctrl);
   const [moveUpKeybinds, setMoveUpKeybinds] = useState([]);
   const [moveDownKeybinds, setMoveDownKeybinds] = useState([]);
   const [moveLeftKeybinds, setMoveLeftKeybinds] = useState([]);
   const [moveRightKeybinds, setMoveRightKeybinds] = useState([]);
   const [focusOnSearch, setFocusOnSearch] = useState([]);
+  const [selectNextSortOption, setSelectNextSortOption] = useState([]);
+  const [selectPrevSortOption, setSelectPrevSortOption] = useState([]);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +75,12 @@ function App() {
       setMoveLeftKeybinds(cnf["cnf-moveLeftKeybinds"] || moveLeftKeybinds);
       setMoveRightKeybinds(cnf["cnf-moveRightKeybinds"] || moveRightKeybinds);
       setFocusOnSearch(cnf["cnf-focusOnSearch"] || focusOnSearch);
+      setSelectNextSortOption(
+        cnf["cnf-selectNextSortOption"] || selectNextSortOption
+      );
+      setSelectPrevSortOption(
+        cnf["cnf-selectPrevSortOption"] || selectPrevSortOption
+      );
     })();
   }, []);
 
@@ -76,7 +91,9 @@ function App() {
     moveDownKeybinds,
     moveLeftKeybinds,
     moveRightKeybinds,
-    focusOnSearch
+    focusOnSearch,
+    selectNextSortOption,
+    selectPrevSortOption
   })) {
     useEffect(() => {
       browser.storage.local.set({ [`cnf-${key}`]: value });
@@ -128,10 +145,10 @@ function App() {
                   setModKey((e.target as HTMLSelectElement).value);
                 }}
               >
-                <option value="meta">meta</option>
-                <option value="ctrl">ctrl</option>
-                <option value="alt">alt</option>
-                <option value="shift">shift</option>
+                <option value={Mod.Meta}>{Mod.Meta} ()</option>
+                <option value={Mod.Ctrl}>{Mod.Ctrl}</option>
+                <option value={Mod.Alt}>{Mod.Alt}</option>
+                <option value={Mod.Shift}>{Mod.Shift}</option>
               </select>
             </div>
           </div>
@@ -169,9 +186,21 @@ function App() {
             mod: true
           },
           {
-            label: "Focus on search",
+            label: "Focus on search box",
             keybinds: focusOnSearch,
             setKeybinds: setFocusOnSearch,
+            mod: false
+          },
+          {
+            label: "Select next sort option",
+            keybinds: selectNextSortOption,
+            setKeybinds: setSelectNextSortOption,
+            mod: false
+          },
+          {
+            label: "Select previous sort option",
+            keybinds: selectPrevSortOption,
+            setKeybinds: setSelectPrevSortOption,
             mod: false
           }
         ].map(({ label, keybinds, setKeybinds, mod }) => (
@@ -225,10 +254,10 @@ function BindButton({
       const key = event.key.toLowerCase();
       if (["meta", "control", "alt", "shift"].includes(key)) return;
       const mods = []
-        .concat(event.metaKey ? ["meta"] : [])
-        .concat(event.ctrlKey ? ["ctrl"] : [])
-        .concat(event.altKey ? ["alt"] : [])
-        .concat(event.shiftKey ? ["shift"] : []);
+        .concat(event.metaKey ? [Mod.Meta] : [])
+        .concat(event.ctrlKey ? [Mod.Ctrl] : [])
+        .concat(event.altKey ? [Mod.Alt] : [])
+        .concat(event.shiftKey ? [Mod.Shift] : []);
       if (modKey == null && mods.length === 0) return;
       const code = event.keyCode || event.which || event.charCode;
       const rawKey = keyNames[code] || String.fromCharCode(code).toLowerCase();
