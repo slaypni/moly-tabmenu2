@@ -16,6 +16,7 @@
     "immutable": "^4.0.0-rc.12",
     "lodash-es": "^4.17.15",
     "preact": "^10.0.1",
+    "purecss": "^1.0.1",
     "webextension-polyfill-ts": "^0.10.0"
   },
   "alias": {

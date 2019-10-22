@@ -1,0 +1,48 @@
+@import "purecss/build/pure.css"
+
+font-size = 16px
+
+color-p = #37474f
+color-p-light = #62727b
+color-p-dark = #102027
+
+color-s = #0277bd
+color-s-light = #58a5f0
+color-s-dark = #004c8c
+
+color = rgba(0, 0, 0, 0.85)
+color-light = rgba(0, 0, 0, 0.42)
+color-inv = #ffffff
+
+body
+  font-size: font-size
+
+select
+  font-size: font-size
+
+div#app
+  margin: 0 auto
+  width: 800px
+
+div.title
+  margin: 40px 0
+
+span.moly
+  color: color-light
+  font-size: 36px
+
+span.tabmenu
+  color: color
+  font-size: 48px
+
+button.keybind, button.keybind-delete
+  margin-right: 16px
+
+button.keybind.active:not(.undefined)
+  margin-right: 2px
+
+button.keybind.active, button.keybind-delete.active
+  &.active
+    background-color: color-s
+    color: color-inv
+
