@@ -5,7 +5,8 @@ export enum Method {
   SetLastPanel,
   GetLastSort,
   SetLastSort,
-  GetConfig
+  GetConfig,
+  GetStyle
 }
 
 export enum Sort {

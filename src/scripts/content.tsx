@@ -1,5 +1,5 @@
 import hotkeys from "hotkeys-js";
-import { h, render, JSX } from "preact";
+import { h, render, JSX, Fragment } from "preact";
 import { useEffect, useState, useRef } from "preact/hooks";
 
 import { Method, Sort, Message, Panel, Tab, Config } from "./types";
@@ -14,6 +14,7 @@ function App() {
   const selectedTabElementRef = useRef(null);
   const [isMouseMode, setIsMouseMode] = useState<boolean>(false);
   const [config, setConfig] = useState<Config | null>(null);
+  const [style, setStyle] = useState<string>("");
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
@@ -124,12 +125,13 @@ function App() {
 
   useEffect(() => {
     chrome.runtime.sendMessage({ method: Method.GetConfig }, setConfig);
+    chrome.runtime.sendMessage({ method: Method.GetStyle }, setStyle);
   }, []);
 
   const getPanelElement = (p: Panel, name: string): JSX.Element => {
     return (
       <div
-        class={"molytabmenu-panel" + (p === panel ? " activated" : "")}
+        class={"panel" + (p === panel ? " activated" : "")}
         onClick={() => {
           setPanel(p);
         }}
@@ -141,12 +143,12 @@ function App() {
 
   const getTabsElement = (): JSX.Element => {
     return (
-      <div class="molytabmenu-tabs">
+      <div class="tabs">
         {tabs.map((tab, i) => {
           const isSelected = index === i;
           return (
             <div
-              class={"molytabmenu-tab" + (isSelected ? " selected" : "")}
+              class={"tab" + (isSelected ? " selected" : "")}
               key={tab.id.toString()}
               ref={isSelected ? selectedTabElementRef : null}
               onClick={() => {
@@ -158,8 +160,8 @@ function App() {
                 setIndex(i);
               }}
             >
-              <img class="molytabmenu-favicon" src={tab.favIconUrl} />
-              <span class="molytabmenu-title">{tab.title}</span>
+              <img class="favicon" src={tab.favIconUrl} />
+              <span class="title">{tab.title}</span>
             </div>
           );
         })}
@@ -167,53 +169,57 @@ function App() {
     );
   };
 
-  return isActive ? (
-    <div
-      class="molytabmenu-container"
-      onMouseMove={() => {
-        setIsMouseMode(true);
-      }}
-    >
-      <div class="molytabmenu-top">
-        <div class="molytabmenu-search">
-          <input
-            type="text"
-            placeholder="Search"
-            onInput={e => setQuery((e.target as HTMLInputElement).value)}
-          />
-        </div>
-        <div class="molytabmenu-option">
-          <span class="molytabmenu-label">sort by</span>
-          <div class="molytabmenu-select">
-            <select
-              value={sort}
-              onInput={e => {
-                setSort(parseInt((e.target as HTMLSelectElement).value));
-              }}
-            >
-              <option value={Sort.Active}>Active</option>
-              <option value={Sort.ActiveHost}>Active Host</option>
-              <option value={Sort.Normal}>Normal</option>
-              <option value={Sort.Title}>Title</option>
-              <option value={Sort.Url}>URL</option>
-            </select>
-            <svg focusable="false" viewBox="0 0 24 24">
-              <path d="M7 10l5 5 5-5z"></path>
-            </svg>
+  return isActive && style ? (
+    <Fragment>
+      <style>{style}</style>
+      <div
+        class="container"
+        onMouseMove={() => {
+          setIsMouseMode(true);
+        }}
+      >
+        <div class="top">
+          <div class="search">
+            <input
+              type="text"
+              placeholder="Search"
+              onInput={e => setQuery((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          <div class="option">
+            <span class="label">sort by</span>
+            <div class="select">
+              <select
+                value={sort}
+                onInput={e => {
+                  setSort(parseInt((e.target as HTMLSelectElement).value));
+                }}
+              >
+                <option value={Sort.Active}>Active</option>
+                <option value={Sort.ActiveHost}>Active Host</option>
+                <option value={Sort.Normal}>Normal</option>
+                <option value={Sort.Title}>Title</option>
+                <option value={Sort.Url}>URL</option>
+              </select>
+              <svg focusable="false" viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z"></path>
+              </svg>
+            </div>
           </div>
         </div>
+        <div class="category">
+          {getPanelElement(Panel.Opening, "Opening")}
+          {getPanelElement(Panel.Closed, "Closed")}
+          {getPanelElement(Panel.History, "History")}
+        </div>
+        {getTabsElement()}
       </div>
-      <div class="molytabmenu-category">
-        {getPanelElement(Panel.Opening, "Opening")}
-        {getPanelElement(Panel.Closed, "Closed")}
-        {getPanelElement(Panel.History, "History")}
-      </div>
-      {getTabsElement()}
-    </div>
+    </Fragment>
   ) : null;
 }
 
 const element = document.createElement("div");
+element.attachShadow({ mode: "open" });
 element.id = "molytabmenu-app";
 document.body.appendChild(element);
-render(<App />, element);
+render(<App />, element.shadowRoot);

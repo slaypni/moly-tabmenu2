@@ -11,6 +11,15 @@ enum State {
 
 const MAX_HISTORY_RESULT = 1000;
 
+let style: string | null = null;
+
+async function getStyle(): Promise<string> {
+  if (style == null) {
+    style = await (await fetch("styles/content.css")).text();
+  }
+  return style;
+}
+
 async function getConfig(): Promise<Config> {
   const cnf = await browser.storage.local.get();
   return Object.assign(
@@ -197,5 +206,8 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 
     case Method.GetConfig:
       return await getConfig();
+
+    case Method.GetStyle:
+      return await getStyle();
   }
 });
