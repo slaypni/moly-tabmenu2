@@ -1,5 +1,14 @@
 border-radius = 8px
 font-size = 14px
+width = 400px
+padding-lr = 10px
+
+color-p = #37474f
+color-p-light = #62727b
+color-p-dark = #102027
+color-s = #0277bd
+color-s-light = #58a5f0
+color-s-dark = #004c8c
 
 #molytabmenu
   all: initial
@@ -11,23 +20,30 @@ font-size = 14px
   background-color: rgba(0, 0, 0, 0)
 
   --color: rgba(0, 0, 0, 0.87)
+  --highlighted-color: white
+  --light-color: gray
   --bg-color: white
+  --highlighted-bg-color: color-s-dark
   --border-color: gray
-  --line-color: rgba(0, 0, 0, 0.87)
-  --highlighted-line-color: rgba(0, 255, 255, 0.87)
+  --line-color: gray
+  --highlighted-line-color: color-s-light
   --search-bg-color: rgba(0, 0, 0, 0.13)
 
 #molytabmenu-app
   .container
+    all: initial
     position: fixed
     z-index: 2147483647
     left: calc(-50vw + 50%);
     right: calc(-50vw + 50%);
-    margin-left: auto;
-    margin-right: auto;
+    margin: 10px auto
     top: 0
-    padding: 8px 10px
-    width: 400px
+    padding: 8px 0
+    width: width
+    max-height: 100vh
+    box-sizing: border-box
+    overflow-x: hidden
+    overflow-y: hidden
     background-color: var(--bg-color)
     border: 1px solid var(--border-color)
     border-radius: border-radius
@@ -41,14 +57,15 @@ font-size = 14px
     flex-flow: row nowrap
     align-items: center
     height: 28px
-    margin-bottom: 4px
+    margin-bottom: 2px
+    padding: 0 padding-lr
 
     .search
-      margin-right: 10px
+      margin-right: 8px
 
   .label
     font-size: font-size - 2px
-    color: gray
+    color: var(--light-color)
 
   .search
     box-sizing: border-box
@@ -60,12 +77,12 @@ font-size = 14px
       flex-grow: 1
       color: var(--color)
       padding: 6px 10px
-      height: font-size
+      height: font-size - 1px
       border: 0
       border-radius: border-radius
       box-sizing: content-box
       background-color: var(--search-bg-color)
-      font-size: font-size
+      font-size: font-size - 1px
       line-height: font-size
 
       &:focus
@@ -75,13 +92,14 @@ font-size = 14px
     display: flex
     flex-flow: row nowrap
     justify-content: space-between
-    margin-bottom: 8px
+    margin-bottom: 10px
+    padding: 0 padding-lr
 
     .panel
       width: 32.5%
-      height: 28px
-      line-height: 28px
-      font-size: font-size
+      height: 24px
+      line-height: 24px
+      font-size: font-size - 2px
       text-align: center
       border-bottom: 1px solid var(--line-color)
       cursor: pointer
@@ -89,6 +107,9 @@ font-size = 14px
       &.activated
         cursor: default
         border-bottom: 1px solid var(--highlighted-line-color)
+
+      &:not(.activated)
+        color: var(--light-color)
 
   .select
     display: inline
@@ -100,7 +121,7 @@ font-size = 14px
       cursor: pointer
       user-select: none
       box-sizing: content-box
-      padding: 4px 0 2px
+      padding: 0 0 4px
       border: 0
       border-bottom: 1px solid var(--line-color)
       border-radius: 0
@@ -112,7 +133,7 @@ font-size = 14px
 
     svg
       color: var(--color)
-      transform: translate(-14px, 0.4em)
+      transform: translate(-14px, 0.3em)
       position: absolute
       pointer-events: none
 
@@ -122,10 +143,41 @@ font-size = 14px
       user-select: none
 
   .tabs
+    overflow-y: scroll
+    max-height: calc(100vh - 103px)
+    line-height: 26px
+
     .tab
+      position: relative
+      padding: 0 (padding-lr + 16px) 0 padding-lr
       cursor: pointer
+      text-overflow: ''
+      word-wrap: break-word
+      white-space: nowrap
+      overflow: hidden
       &.selected
-        background-color: yellow
-    .favicon
-      width: 16px
-      height: 16px
+        color: var(--highlighted-color)
+        background-color: var(--highlighted-bg-color)
+
+      .favicon
+        margin-right: 4px
+        width: 16px
+        height: 16px
+        vertical-align: middle
+        &.hidden
+          visibility: hidden
+
+      .grad
+        display: inline
+        position: absolute
+        right: 0
+        height: 26px
+        pointer-events: none
+
+      &.selected .grad
+        width: 80px
+        background: linear-gradient(90deg, transparent, var(--highlighted-bg-color) 40px);
+
+      &:not(.selected) .grad
+        width: 50px
+        background: linear-gradient(90deg, transparent, var(--bg-color) 40px);

@@ -11,10 +11,11 @@ function App() {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [query, setQuery] = useState<string>("");
   const [index, setIndex] = useState<number>(0);
-  const selectedTabElementRef = useRef(null);
   const [isMouseMode, setIsMouseMode] = useState<boolean>(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
+  const selectedTabsElementRef = useRef<HTMLElement | null>(null);
+  const selectedTabElementRef = useRef<HTMLElement | null>(null);
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
@@ -74,11 +75,27 @@ function App() {
     if (tabs.length) {
       setIndex((tabs.length + index) % tabs.length);
     }
+
+    if (tabs.length !== 0) {
+      const tabsTop = selectedTabsElementRef.current.offsetTop;
+      const tabsHeight = selectedTabsElementRef.current.clientHeight;
+      const tabTop = selectedTabElementRef.current.offsetTop - tabsTop;
+      const tabHeight = selectedTabElementRef.current.clientHeight;
+      const scroll = selectedTabsElementRef.current.scrollTop;
+
+      if (tabTop + tabHeight > scroll + tabsHeight) {
+        selectedTabsElementRef.current.scrollTop =
+          tabTop + tabHeight - tabsHeight;
+      } else if (tabTop - scroll < 0) {
+        selectedTabsElementRef.current.scrollTop = tabTop;
+      }
+    }
   }, [index, tabs]);
 
   useEffect(() => {
     if (panel == null) return;
     chrome.runtime.sendMessage({ method: Method.SetLastPanel, body: panel });
+    setIndex(0);
   }, [panel]);
 
   useEffect(() => {
@@ -143,7 +160,7 @@ function App() {
 
   const getTabsElement = (): JSX.Element => {
     return (
-      <div class="tabs">
+      <div class="tabs" ref={selectedTabsElementRef}>
         {tabs.map((tab, i) => {
           const isSelected = index === i;
           return (
@@ -160,8 +177,15 @@ function App() {
                 setIndex(i);
               }}
             >
-              <img class="favicon" src={tab.favIconUrl} />
+              <img
+                class={"favicon" + (tab.favIconUrl ? "" : " hidden")}
+                // @ts-ignore TS2322
+                loading="lazy"
+                decoding="async"
+                src={tab.favIconUrl}
+              />
               <span class="title">{tab.title}</span>
+              <div class="grad"></div>
             </div>
           );
         })}
