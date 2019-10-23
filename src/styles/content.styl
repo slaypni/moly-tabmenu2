@@ -1,18 +1,12 @@
 border-radius = 8px
 font-size = 14px
 
-#molytabmenu-app
+#molytabmenu
+  all: initial
   position: fixed
   z-index: 2147483647
-  top: 0
-  left: 0
-  margin: 0
-  padding: 0
-  width: 100vw
-  height: auto
-  overflow-x: hidden
-  overflow-y: auto
-  font-size: font-size
+  width: 0
+  height: 0
   pointer-events: none
   background-color: rgba(0, 0, 0, 0)
 
@@ -23,103 +17,115 @@ font-size = 14px
   --highlighted-line-color: rgba(0, 255, 255, 0.87)
   --search-bg-color: rgba(0, 0, 0, 0.13)
 
-.container
-  top: 0
-  margin: 0 auto
-  padding: 8px 10px
-  width: 400px
-  background-color: var(--bg-color)
-  border: 1px solid var(--border-color)
-  border-radius: border-radius
-  pointer-events: auto
+#molytabmenu-app
+  .container
+    position: fixed
+    z-index: 2147483647
+    left: calc(-50vw + 50%);
+    right: calc(-50vw + 50%);
+    margin-left: auto;
+    margin-right: auto;
+    top: 0
+    padding: 8px 10px
+    width: 400px
+    background-color: var(--bg-color)
+    border: 1px solid var(--border-color)
+    border-radius: border-radius
+    pointer-events: auto
 
-.top
-  display: flex
-  flex-flow: row nowrap
-  align-items: center
-  height: 28px
-  margin-bottom: 4px
+    color: var(--color)
+    font-size: font-size
+
+  .top
+    display: flex
+    flex-flow: row nowrap
+    align-items: center
+    height: 28px
+    margin-bottom: 4px
+
+    .search
+      margin-right: 10px
+
+  .label
+    font-size: font-size - 2px
+    color: gray
 
   .search
-    margin-right: 10px
-
-.label
-  font-size: font-size - 2px
-  color: gray
-
-.search
-  box-sizing: border-box
-  flex-grow: 1
-  display inline-flex
-  cursor: text
-
-  input
+    box-sizing: border-box
     flex-grow: 1
-    color: var(--color)
-    padding: 8px 10px
-    height: 1em
-    border: 0
-    border-radius: border-radius
-    box-sizing: content-box
-    background-color: var(--search-bg-color)
+    display inline-flex
+    cursor: text
 
-    &:focus
-      outline: 0
+    input
+      flex-grow: 1
+      color: var(--color)
+      padding: 6px 10px
+      height: font-size
+      border: 0
+      border-radius: border-radius
+      box-sizing: content-box
+      background-color: var(--search-bg-color)
+      font-size: font-size
+      line-height: font-size
 
-.category
-  display: flex
-  flex-flow: row nowrap
-  justify-content: space-between
-  margin-bottom: 8px
+      &:focus
+        outline: 0
 
-  .panel
-    width: 32.5%
-    height: 28px
-    line-height: 28px
-    font-size: font-size
-    text-align: center
-    border-bottom: 1px solid var(--line-color)
-    cursor: pointer
+  .category
+    display: flex
+    flex-flow: row nowrap
+    justify-content: space-between
+    margin-bottom: 8px
 
-    &.activated
-      cursor: default
-      border-bottom: 1px solid var(--highlighted-line-color)
+    .panel
+      width: 32.5%
+      height: 28px
+      line-height: 28px
+      font-size: font-size
+      text-align: center
+      border-bottom: 1px solid var(--line-color)
+      cursor: pointer
 
-.select
-  display: inline
-  margin-left: 8px
+      &.activated
+        cursor: default
+        border-bottom: 1px solid var(--highlighted-line-color)
 
-  select
-    font-size: font-size
-    color: var(--color)
-    cursor: pointer
-    user-select: none
-    box-sizing: content-box
-    padding: 6px 0 2px
-    border: 0
-    border-bottom: 1px solid var(--line-color)
-    border-radius: 0
-    width: 100px
-    height: 1em
-    background: none
-    -webkit-appearance: none
-    -moz-appearance: none
+  .select
+    display: inline
+    margin-left: 8px
 
-  svg
-    color: var(--color)
-    transform: translate(-14px, 0.4em)
-    position: absolute
-    pointer-events: none
+    select
+      font-size: font-size
+      color: var(--color)
+      cursor: pointer
+      user-select: none
+      box-sizing: content-box
+      padding: 4px 0 2px
+      border: 0
+      border-bottom: 1px solid var(--line-color)
+      border-radius: 0
+      width: 100px
+      height: font-size
+      background: none
+      -webkit-appearance: none
+      -moz-appearance: none
 
-    width: 1em
-    height: 1em
-    display: inline-block
-    user-select: none
+    svg
+      color: var(--color)
+      transform: translate(-14px, 0.4em)
+      position: absolute
+      pointer-events: none
 
-.tabs
-  .tab
-    &.selected
-      background-color: yellow
-  .favicon
-    width: 16px
-    height: 16px
+      width: 1em
+      height: 1em
+      display: inline-block
+      user-select: none
+
+  .tabs
+    .tab
+      cursor: pointer
+      &.selected
+        background-color: yellow
+    .favicon
+      width: 16px
+      height: 16px
