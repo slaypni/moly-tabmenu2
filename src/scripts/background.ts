@@ -31,9 +31,11 @@ async function getConfig(): Promise<Config> {
       "moveDownKeybinds",
       "moveLeftKeybinds",
       "moveRightKeybinds",
+      "closeItemKeybinds",
       "focusOnSearchKeybinds",
       "selectNextSortKeybinds",
-      "selectPrevSortKeybinds"
+      "selectPrevSortKeybinds",
+      "deactivateKeybinds"
     ].map(k => ({ [k]: cnf[`cnf-${k}`] }))
   );
 }

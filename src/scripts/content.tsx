@@ -18,6 +18,7 @@ function App() {
   const selectedTabElementRef = useRef<HTMLElement | null>(null);
   const searchBoxElementRef = useRef<HTMLElement | null>(null);
   const containerElementRef = useRef<HTMLElement | null>(null);
+  const rememberLastPanel = false;
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
@@ -41,6 +42,27 @@ function App() {
     setIsAutoEnterMode(false);
   };
 
+  const onMovePanelKeyRef = useRef(null);
+  onMovePanelKeyRef.current = (offset: number) => {
+    const panelIndexes = {
+      [Panel.Opening]: 0,
+      [Panel.Closed]: 1,
+      [Panel.History]: 2
+    };
+    const panelCount = Object.keys(panelIndexes).length;
+
+    const i =
+      ((panel != null ? panelIndexes[panel] : Panel.Opening) +
+        panelCount +
+        offset) %
+      panelCount;
+    Object.values(panelIndexes)[i];
+
+    setIsActive(true);
+    setPanel(i);
+    setIsAutoEnterMode(false);
+  };
+
   const openTab = (tab: Tab) => {
     chrome.runtime.sendMessage({
       method: Method.OpenTab,
@@ -57,18 +79,34 @@ function App() {
   useEffect(() => {
     if (!(isActive && style)) return;
     containerElementRef.current.addEventListener("focusout", e => {
+      //console.log(e.relatedTarget)
+      //console.log(e.target)
       const focusedTarget = e.relatedTarget as (HTMLElement | null);
       if (!(e.target as HTMLElement).contains(focusedTarget)) {
+        //console.log("deac")
         setIsActive(false);
       }
     });
-    containerElementRef.current.focus();
+
+    // todo: document.activeElement?.shadowRoot?.activeElement
+    const focusedElement =
+      document.activeElement &&
+      document.activeElement.shadowRoot &&
+      document.activeElement.shadowRoot.activeElement;
+
+    if (!containerElementRef.current.contains(focusedElement)) {
+      containerElementRef.current.focus();
+    }
   }, [isActive, style]);
 
   useEffect(() => {
     if (isActive) {
       if (panel == null) {
-        chrome.runtime.sendMessage({ method: Method.GetLastPanel }, setPanel);
+        if (rememberLastPanel) {
+          chrome.runtime.sendMessage({ method: Method.GetLastPanel }, setPanel);
+        } else {
+          setPanel(Panel.Opening);
+        }
       }
       if (sort == null) {
         chrome.runtime.sendMessage({ method: Method.GetLastSort }, setSort);
@@ -109,7 +147,9 @@ function App() {
 
   useEffect(() => {
     if (panel == null) return;
-    chrome.runtime.sendMessage({ method: Method.SetLastPanel, body: panel });
+    if (rememberLastPanel) {
+      chrome.runtime.sendMessage({ method: Method.SetLastPanel, body: panel });
+    }
     if (tabs.length != 0) {
       setIndex(0);
     }
@@ -136,31 +176,44 @@ function App() {
     };
 
     hotkeys("*", { keyup: true }, event => {
-      // console.log(`modKey ${hotkeys.isPressed("ctrl")}`);
       onAnyKeyRef.current(event.type);
     });
 
-    hotkeys(
-      config.moveDownKeybinds.map(key => `${config.modKey}+${key}`).join(","),
-      () => {
-        // console.log("moveDown");
-        onMoveKeyRef.current(1);
-      }
-    );
+    const bind = (keybinds: string[], mod: boolean, callback: () => void) => {
+      const _keybinds = keybinds
+        .map(key => (mod ? `${config.modKey}+` : "") + `${key}`)
+        .join(",");
+      hotkeys(_keybinds, callback);
+      return () => {
+        hotkeys.unbind(_keybinds, callback);
+      };
+    };
 
-    hotkeys(
-      config.moveUpKeybinds.map(key => `${config.modKey}+${key}`).join(","),
-      () => {
-        // console.log("moveUp");
-        onMoveKeyRef.current(-1);
-      }
-    );
+    bind(config.moveDownKeybinds, true, () => {
+      onMoveKeyRef.current(1);
+    });
 
-    hotkeys(config.focusOnSearchKeybinds.map(key => `${key}`).join(","), () => {
+    bind(config.moveUpKeybinds, true, () => {
+      onMoveKeyRef.current(-1);
+    });
+
+    bind(config.moveLeftKeybinds, true, () => {
+      onMovePanelKeyRef.current(-1);
+    });
+
+    bind(config.moveRightKeybinds, true, () => {
+      onMovePanelKeyRef.current(1);
+    });
+
+    bind(config.focusOnSearchKeybinds, false, () => {
       setIsActive(true);
       setTimeout(() => {
         searchBoxElementRef.current.focus();
       });
+    });
+
+    bind(config.deactivateKeybinds, false, () => {
+      setIsActive(false);
     });
   }, [config]);
 

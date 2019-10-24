@@ -61,28 +61,32 @@ function App() {
   const [moveDownKeybinds, setMoveDownKeybinds] = useState([]);
   const [moveLeftKeybinds, setMoveLeftKeybinds] = useState([]);
   const [moveRightKeybinds, setMoveRightKeybinds] = useState([]);
+  const [closeItemKeybinds, setCloseItemKeybinds] = useState([]);
   const [focusOnSearchKeybinds, setFocusOnSearchKeybinds] = useState([]);
   const [selectNextSortKeybinds, setSelectNextSortKeybinds] = useState([]);
   const [selectPrevSortKeybinds, setSelectPrevSortKeybinds] = useState([]);
+  const [deactivateKeybinds, setDeactivateKeybinds] = useState([]);
 
   useEffect(() => {
     (async () => {
       const cnf = await browser.storage.local.get();
-      setMouseModButton(cnf["cnf-mouseModButton"] || mouseModButton);
-      setModKey(cnf["cnf-modKey"] || modKey);
-      setMoveUpKeybinds(cnf["cnf-moveUpKeybinds"] || moveUpKeybinds);
-      setMoveDownKeybinds(cnf["cnf-moveDownKeybinds"] || moveDownKeybinds);
-      setMoveLeftKeybinds(cnf["cnf-moveLeftKeybinds"] || moveLeftKeybinds);
-      setMoveRightKeybinds(cnf["cnf-moveRightKeybinds"] || moveRightKeybinds);
-      setFocusOnSearchKeybinds(
-        cnf["cnf-focusOnSearchKeybinds"] || focusOnSearchKeybinds
-      );
-      setSelectNextSortKeybinds(
-        cnf["cnf-selectNextSortKeybinds"] || selectNextSortKeybinds
-      );
-      setSelectPrevSortKeybinds(
-        cnf["cnf-selectPrevSortKeybinds"] || selectPrevSortKeybinds
-      );
+      for (let [kv, setState] of [
+        [{ mouseModButton }, setMouseModButton],
+        [{ modKey }, setModKey],
+        [{ moveUpKeybinds }, setMoveUpKeybinds],
+        [{ moveDownKeybinds }, setMoveDownKeybinds],
+        [{ moveLeftKeybinds }, setMoveLeftKeybinds],
+        [{ moveRightKeybinds }, setMoveRightKeybinds],
+        [{ closeItemKeybinds }, setCloseItemKeybinds],
+        [{ focusOnSearchKeybinds }, setFocusOnSearchKeybinds],
+        [{ selectNextSortKeybinds }, setSelectNextSortKeybinds],
+        [{ selectPrevSortKeybinds }, setSelectPrevSortKeybinds],
+        [{ deactivateKeybinds }, setDeactivateKeybinds]
+      ]) {
+        const key = `cnf-${Object.keys(kv)[0]}`;
+        const value = Object.values(kv)[0];
+        (setState as any)(cnf[key] || value);
+      }
     })();
   }, []);
 
@@ -93,9 +97,11 @@ function App() {
     moveDownKeybinds,
     moveLeftKeybinds,
     moveRightKeybinds,
+    closeItemKeybinds,
     focusOnSearchKeybinds,
     selectNextSortKeybinds,
-    selectPrevSortKeybinds
+    selectPrevSortKeybinds,
+    deactivateKeybinds
   })) {
     useEffect(() => {
       browser.storage.local.set({ [`cnf-${key}`]: value });
@@ -188,6 +194,12 @@ function App() {
             mod: true
           },
           {
+            label: "Close selected tab",
+            keybinds: closeItemKeybinds,
+            setKeybinds: setCloseItemKeybinds,
+            mod: true
+          },
+          {
             label: "Focus on search box",
             keybinds: focusOnSearchKeybinds,
             setKeybinds: setFocusOnSearchKeybinds,
@@ -203,6 +215,12 @@ function App() {
             label: "Select previous sort option",
             keybinds: selectPrevSortKeybinds,
             setKeybinds: setSelectPrevSortKeybinds,
+            mod: false
+          },
+          {
+            label: "Close menu",
+            keybinds: deactivateKeybinds,
+            setKeybinds: setDeactivateKeybinds,
             mod: false
           }
         ].map(({ label, keybinds, setKeybinds, mod }) => (
