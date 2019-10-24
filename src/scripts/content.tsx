@@ -14,6 +14,7 @@ function App() {
   const [isAutoEnterMode, setIsAutoEnterMode] = useState<boolean>(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const selectedTabsElementRef = useRef<HTMLElement | null>(null);
   const selectedTabElementRef = useRef<HTMLElement | null>(null);
   const searchBoxElementRef = useRef<HTMLElement | null>(null);
@@ -103,10 +104,6 @@ function App() {
   };
 
   useEffect(() => {
-    setIsActive(true); ////
-  }, []);
-
-  useEffect(() => {
     if (!(isActive && style)) return;
     containerElementRef.current.addEventListener("focusout", e => {
       //console.log(e.relatedTarget)
@@ -149,6 +146,7 @@ function App() {
       setSort(null);
       selectedTabElementRef.current = null;
       setIsAutoEnterMode(false);
+      setIsInitialized(false);
     }
   }, [isActive]);
 
@@ -194,7 +192,10 @@ function App() {
     if (!isActive || panel == null || sort == null) return;
     chrome.runtime.sendMessage(
       { method: Method.GetTabs, panel: panel, sort: sort, query: query },
-      setTabs
+      tabs => {
+        setTabs(tabs);
+        setIsInitialized(true);
+      }
     );
   }, [panel, sort, query]);
 
@@ -312,6 +313,8 @@ function App() {
                 // @ts-ignore TS2322
                 loading="lazy"
                 decoding="async"
+                width="16"
+                height="16"
               />
               <span class="title">{tab.title}</span>
               <div class="grad"></div>
@@ -348,6 +351,7 @@ function App() {
           }}
           // @ts-ignore TS2322
           tabindex="-1"
+          style={isInitialized ? "" : "opacity: 0"}
         >
           <div class="top">
             <div class="search">
