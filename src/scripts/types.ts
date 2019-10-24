@@ -45,7 +45,9 @@ export interface Config {
   moveDownKeybinds: string[];
   moveLeftKeybinds: string[];
   moveRightKeybinds: string[];
+  closeItemKeybinds: string[];
   focusOnSearchKeybinds: string[];
   selectNextSortKeybinds: string[];
   selectPrevSortKeybinds: string[];
+  deactivateKeybinds: string[];
 }

@@ -9,7 +9,7 @@ enum State {
   LastSort = "LastSort"
 }
 
-const MAX_HISTORY_RESULT = 1000;
+const MAX_HISTORY_RESULT = 200;
 
 let style: string | null = null;
 
@@ -160,10 +160,14 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
         }
 
         case Panel.History: {
+          const searchable = message.query.length >= 3;
           let items = await browser.history.search({
-            text: message.query,
+            text: searchable ? message.query : "",
             maxResults: MAX_HISTORY_RESULT
           });
+          if (!searchable) {
+            items = items.filter(doesContainQuery)
+          }
           items = await getSortedTabs(items);
           return items.map(item => pick(item, ["id", "title", "url"]));
         }

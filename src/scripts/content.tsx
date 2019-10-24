@@ -11,11 +11,13 @@ function App() {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [query, setQuery] = useState<string>("");
   const [index, setIndex] = useState<number>(0);
-  const [isMouseMode, setIsMouseMode] = useState<boolean>(false);
+  const [isAutoEnterMode, setIsAutoEnterMode] = useState<boolean>(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
   const selectedTabsElementRef = useRef<HTMLElement | null>(null);
   const selectedTabElementRef = useRef<HTMLElement | null>(null);
+  const searchBoxElementRef = useRef<HTMLElement | null>(null);
+  const containerElementRef = useRef<HTMLElement | null>(null);
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
@@ -25,7 +27,7 @@ function App() {
           // console.log("modKey keydown");
           break;
         case "keyup":
-          if (!hotkeys.isPressed(config.modKey) && !isMouseMode) {
+          if (!hotkeys.isPressed(config.modKey) && !isAutoEnterMode) {
             selectedTabElementRef.current.click(); // todo: should use current?.click()
           }
           break;
@@ -36,7 +38,7 @@ function App() {
   onMoveKeyRef.current = (offset: number) => {
     setIsActive(true);
     setIndex(index + offset);
-    setIsMouseMode(false);
+    setIsAutoEnterMode(false);
   };
 
   const openTab = (tab: Tab) => {
@@ -53,6 +55,17 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!(isActive && style)) return;
+    containerElementRef.current.addEventListener("focusout", e => {
+      const focusedTarget = e.relatedTarget as (HTMLElement | null);
+      if (!(e.target as HTMLElement).contains(focusedTarget)) {
+        setIsActive(false);
+      }
+    });
+    containerElementRef.current.focus();
+  }, [isActive, style]);
+
+  useEffect(() => {
     if (isActive) {
       if (panel == null) {
         chrome.runtime.sendMessage({ method: Method.GetLastPanel }, setPanel);
@@ -67,7 +80,7 @@ function App() {
       setPanel(null);
       setSort(null);
       selectedTabElementRef.current = null;
-      setIsMouseMode(false);
+      setIsAutoEnterMode(false);
     }
   }, [isActive]);
 
@@ -77,17 +90,19 @@ function App() {
     }
 
     if (tabs.length !== 0) {
-      const tabsTop = selectedTabsElementRef.current.offsetTop;
-      const tabsHeight = selectedTabsElementRef.current.clientHeight;
-      const tabTop = selectedTabElementRef.current.offsetTop - tabsTop;
-      const tabHeight = selectedTabElementRef.current.clientHeight;
-      const scroll = selectedTabsElementRef.current.scrollTop;
+      if (selectedTabsElementRef.current && selectedTabElementRef.current) {
+        const tabsTop = selectedTabsElementRef.current.offsetTop;
+        const tabsHeight = selectedTabsElementRef.current.clientHeight;
+        const tabTop = selectedTabElementRef.current.offsetTop - tabsTop;
+        const tabHeight = selectedTabElementRef.current.clientHeight;
+        const scroll = selectedTabsElementRef.current.scrollTop;
 
-      if (tabTop + tabHeight > scroll + tabsHeight) {
-        selectedTabsElementRef.current.scrollTop =
-          tabTop + tabHeight - tabsHeight;
-      } else if (tabTop - scroll < 0) {
-        selectedTabsElementRef.current.scrollTop = tabTop;
+        if (tabTop + tabHeight > scroll + tabsHeight) {
+          selectedTabsElementRef.current.scrollTop =
+            tabTop + tabHeight - tabsHeight;
+        } else if (tabTop - scroll < 0) {
+          selectedTabsElementRef.current.scrollTop = tabTop;
+        }
       }
     }
   }, [index, tabs]);
@@ -95,7 +110,9 @@ function App() {
   useEffect(() => {
     if (panel == null) return;
     chrome.runtime.sendMessage({ method: Method.SetLastPanel, body: panel });
-    setIndex(0);
+    if (tabs.length != 0) {
+      setIndex(0);
+    }
   }, [panel]);
 
   useEffect(() => {
@@ -138,6 +155,13 @@ function App() {
         onMoveKeyRef.current(-1);
       }
     );
+
+    hotkeys(config.focusOnSearchKeybinds.map(key => `${key}`).join(","), () => {
+      setIsActive(true);
+      setTimeout(() => {
+        searchBoxElementRef.current.focus();
+      });
+    });
   }, [config]);
 
   useEffect(() => {
@@ -179,10 +203,10 @@ function App() {
             >
               <img
                 class={"favicon" + (tab.favIconUrl ? "" : " hidden")}
+                src={tab.favIconUrl}
                 // @ts-ignore TS2322
                 loading="lazy"
                 decoding="async"
-                src={tab.favIconUrl}
               />
               <span class="title">{tab.title}</span>
               <div class="grad"></div>
@@ -199,16 +223,23 @@ function App() {
       <div id="molytabmenu-app">
         <div
           class="container"
+          ref={containerElementRef}
           onMouseMove={() => {
-            setIsMouseMode(true);
+            setIsAutoEnterMode(true);
           }}
+          // @ts-ignore TS2322
+          tabindex="-1"
         >
           <div class="top">
             <div class="search">
               <input
                 type="text"
                 placeholder="Search"
+                ref={searchBoxElementRef}
                 onInput={e => setQuery((e.target as HTMLInputElement).value)}
+                onFocus={() => {
+                  setIsAutoEnterMode(true);
+                }}
               />
             </div>
             <div class="option">
