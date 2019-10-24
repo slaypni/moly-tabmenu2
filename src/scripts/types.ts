@@ -6,7 +6,8 @@ export enum Method {
   GetLastSort,
   SetLastSort,
   GetConfig,
-  GetStyle
+  GetStyle,
+  CloseTab
 }
 
 export enum Sort {

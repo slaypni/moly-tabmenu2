@@ -70,7 +70,13 @@ function App() {
       const optionsCount = sortSelectElementRef.current.options.length;
       const i = (sort + offset + optionsCount) % optionsCount;
       setSort(i);
-    };
+    }
+  };
+
+  const onCloseTabKeyRef = useRef(null);
+  onCloseTabKeyRef.current = () => {
+    if (panel !== Panel.Opening) return;
+    closeTab(parseInt(selectedTabElementRef.current.dataset["index"]));
   };
 
   const openTab = (tab: Tab) => {
@@ -80,6 +86,20 @@ function App() {
       body: panel !== Panel.History ? tab.id : tab.url
     });
     setIsActive(false);
+  };
+
+  const closeTab = (tabId: number) => {
+    if (panel !== Panel.Opening) return;
+    chrome.runtime.sendMessage({
+      method: Method.CloseTab,
+      body: tabId
+    });
+    const i = tabs.findIndex(t => t.id === tabId);
+    if (i !== -1) {
+      const _tabs = [...tabs];
+      _tabs.splice(i, 1);
+      setTabs(_tabs);
+    }
   };
 
   useEffect(() => {
@@ -189,7 +209,16 @@ function App() {
       onAnyKeyRef.current(event.type);
     });
 
-    const bind = (keybinds: string[], mod: boolean, callback: () => void) => {
+    hotkeys("enter", { keyup: true }, () => {
+      if (!selectedTabElementRef.current) return;
+      selectedTabElementRef.current.click();
+    });
+
+    const bind = (
+      keybinds: string[],
+      mod: boolean,
+      callback: (event: KeyboardEvent) => void
+    ) => {
       const _keybinds = keybinds
         .map(key => (mod ? `${config.modKey}+` : "") + `${key}`)
         .join(",");
@@ -213,6 +242,10 @@ function App() {
 
     bind(config.moveRightKeybinds, true, () => {
       onMovePanelKeyRef.current(1);
+    });
+
+    bind(config.closeItemKeybinds, true, () => {
+      onCloseTabKeyRef.current();
     });
 
     bind(config.focusOnSearchKeybinds, false, () => {
@@ -271,6 +304,7 @@ function App() {
               onMouseMove={() => {
                 setIndex(i);
               }}
+              data-index={tab.id}
             >
               <img
                 class={"favicon" + (tab.favIconUrl ? "" : " hidden")}
@@ -281,6 +315,20 @@ function App() {
               />
               <span class="title">{tab.title}</span>
               <div class="grad"></div>
+              {panel === Panel.Opening && isSelected ? (
+                <div
+                  class="close"
+                  onClick={e => {
+                    e.stopPropagation();
+                    closeTab(tab.id as number);
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                    <path d="M0 0h24v24H0z" fill="none" />
+                  </svg>
+                </div>
+              ) : null}
             </div>
           );
         })}

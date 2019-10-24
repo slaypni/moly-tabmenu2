@@ -215,5 +215,9 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 
     case Method.GetStyle:
       return await getStyle();
+
+    case Method.CloseTab:
+      browser.tabs.remove(message.body)
+      return
   }
 });
