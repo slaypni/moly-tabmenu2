@@ -66,6 +66,7 @@ function App() {
   const [selectNextSortKeybinds, setSelectNextSortKeybinds] = useState([]);
   const [selectPrevSortKeybinds, setSelectPrevSortKeybinds] = useState([]);
   const [deactivateKeybinds, setDeactivateKeybinds] = useState([]);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +88,7 @@ function App() {
         const value = Object.values(kv)[0];
         (setState as any)(cnf[key] || value);
       }
+      setInitialized(true);
     })();
   }, []);
 
@@ -104,6 +106,7 @@ function App() {
     deactivateKeybinds
   })) {
     useEffect(() => {
+      if (!initialized) return;
       browser.storage.local.set({ [`cnf-${key}`]: value });
     }, [value]);
   }

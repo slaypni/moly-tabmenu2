@@ -17,7 +17,8 @@ function App() {
   const selectedTabsElementRef = useRef<HTMLElement | null>(null);
   const selectedTabElementRef = useRef<HTMLElement | null>(null);
   const searchBoxElementRef = useRef<HTMLElement | null>(null);
-  const containerElementRef = useRef<HTMLElement | null>(null);
+  const sortSelectElementRef = useRef<HTMLSelectElement | null>(null);
+  const containerElementRef = useRef<HTMLDivElement | null>(null);
   const rememberLastPanel = false;
 
   const onAnyKeyRef = useRef(null);
@@ -49,18 +50,27 @@ function App() {
       [Panel.Closed]: 1,
       [Panel.History]: 2
     };
-    const panelCount = Object.keys(panelIndexes).length;
+    const panelsCount = Object.keys(panelIndexes).length;
 
     const i =
       ((panel != null ? panelIndexes[panel] : Panel.Opening) +
-        panelCount +
-        offset) %
-      panelCount;
+        offset +
+        panelsCount) %
+      panelsCount;
     Object.values(panelIndexes)[i];
 
     setIsActive(true);
     setPanel(i);
     setIsAutoEnterMode(false);
+  };
+
+  const onSelectSortKeyRef = useRef(null);
+  onSelectSortKeyRef.current = (offset: number) => {
+    if (sortSelectElementRef.current) {
+      const optionsCount = sortSelectElementRef.current.options.length;
+      const i = (sort + offset + optionsCount) % optionsCount;
+      setSort(i);
+    };
   };
 
   const openTab = (tab: Tab) => {
@@ -212,6 +222,14 @@ function App() {
       });
     });
 
+    bind(config.selectPrevSortKeybinds, false, () => {
+      onSelectSortKeyRef.current(-1);
+    });
+
+    bind(config.selectNextSortKeybinds, false, () => {
+      onSelectSortKeyRef.current(1);
+    });
+
     bind(config.deactivateKeybinds, false, () => {
       setIsActive(false);
     });
@@ -300,6 +318,7 @@ function App() {
               <div class="select">
                 <select
                   value={sort}
+                  ref={sortSelectElementRef}
                   onInput={e => {
                     setSort(parseInt((e.target as HTMLSelectElement).value));
                   }}
