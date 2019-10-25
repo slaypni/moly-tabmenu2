@@ -88,6 +88,7 @@ function App() {
     setIndex(index + (event.deltaY > 0 ? 1 : event.deltaY < 0 ? -1 : 0));
     setIsAutoEnterMode(true);
     event.preventDefault();
+    event.stopPropagation();
   };
 
   const openTab = (tab: Tab) => {
@@ -290,22 +291,30 @@ function App() {
     if (config.mouseModButton != null) {
       const modButton = config.mouseModButton.toLowerCase();
 
-      addEventListener("mousedown", event => {
-        if (modButton !== ["left", "middle", "right"][event.button]) return;
-        setIsModButtonPressed(true);
-      });
+      addEventListener(
+        "mousedown",
+        event => {
+          if (modButton !== ["left", "middle", "right"][event.button]) return;
+          setIsModButtonPressed(true);
+        },
+        { capture: true }
+      );
 
-      addEventListener("mouseup", event => {
-        if (modButton !== ["left", "middle", "right"][event.button]) return;
-        setIsModButtonPressed(false);
-      });
+      addEventListener(
+        "mouseup",
+        event => {
+          if (modButton !== ["left", "middle", "right"][event.button]) return;
+          setIsModButtonPressed(false);
+        },
+        { capture: true }
+      );
 
       addEventListener(
         "wheel",
         event => {
           onMouseWheelRef.current(event);
         },
-        { passive: false }
+        { capture: true, passive: false }
       );
     }
   }, [config]);
@@ -440,8 +449,43 @@ function App() {
   ) : null;
 }
 
-const element = document.createElement("div");
-element.attachShadow({ mode: "open" });
-element.id = "molytabmenu";
-document.body.appendChild(element);
-render(<App />, element.shadowRoot);
+const insertApp = () => {
+  if (document.getElementById("molytabmenu") != null) return;
+  const element = document.createElement("div");
+  element.attachShadow({ mode: "open" });
+  element.id = "molytabmenu";
+  document.body.prepend(element);
+  render(<App />, element.shadowRoot);
+};
+
+if (document.body != null) {
+  insertApp();
+} else {
+  const observer = new MutationObserver(() => {
+    if (document.body != null) {
+      observer.disconnect();
+      insertApp();
+    }
+  });
+
+  observer.observe(document, {
+    attributes: false,
+    attributeOldValue: false,
+    characterData: false,
+    characterDataOldValue: false,
+    childList: true,
+    subtree: true
+  });
+
+  document.addEventListener(
+    "readystatechange",
+    event => {
+      switch (event.target.readyState) {
+        case "interactive":
+        case "complete":
+          insertApp();
+      }
+    },
+    { capture: true }
+  );
+}

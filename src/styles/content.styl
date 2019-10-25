@@ -51,6 +51,8 @@ color-s-dark = #004c8c
 
     color: var(--color)
     font-size: font-size
+    text-align: left
+    font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif
 
   .top
     display: flex
@@ -183,13 +185,14 @@ color-s-dark = #004c8c
         background: linear-gradient(90deg, transparent, var(--bg-color) 40px)
 
       .close
-        display: inline
         position: absolute
+        display: inline-flex
+        justify-content: center
+        align-items: center
         right: 10px
         height: 24px
 
         svg
-          vertical-align: middle
           fill: var(--highlighted-color)
 
         &:hover svg

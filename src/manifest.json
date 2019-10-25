@@ -14,7 +14,9 @@
     {
       "matches": ["*://*/*"],
       "js": ["scripts/content.tsx"],
-      "css": ["styles/content.styl"]
+      "css": ["styles/content.styl"],
+      "run_at": "document_start",
+      "all_frames": false
     }
   ],
 
@@ -23,7 +25,7 @@
     "persistent": false
   },
 
-  "options_page": "options.html",
+  "options_ui": { "page": "options.html", "open_in_tab": true },
 
   "permissions": ["tabs", "storage", "sessions", "history"]
 }
