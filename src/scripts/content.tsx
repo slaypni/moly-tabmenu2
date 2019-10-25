@@ -12,6 +12,7 @@ function App() {
   const [query, setQuery] = useState<string>("");
   const [index, setIndex] = useState<number>(0);
   const [isAutoEnterMode, setIsAutoEnterMode] = useState<boolean>(false);
+  const [isModButtonPressed, setIsModButtonPressed] = useState<boolean>(false);
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -30,7 +31,7 @@ function App() {
           // console.log("modKey keydown");
           break;
         case "keyup":
-          if (!hotkeys.isPressed(config.modKey) && !isAutoEnterMode) {
+          if (!hotkeys.isPressed(config.modKey) && isAutoEnterMode) {
             selectedTabElementRef.current.click(); // todo: should use current?.click()
           }
           break;
@@ -41,7 +42,7 @@ function App() {
   onMoveKeyRef.current = (offset: number) => {
     setIsActive(true);
     setIndex(index + offset);
-    setIsAutoEnterMode(false);
+    setIsAutoEnterMode(true);
   };
 
   const onMovePanelKeyRef = useRef(null);
@@ -62,7 +63,7 @@ function App() {
 
     setIsActive(true);
     setPanel(i);
-    setIsAutoEnterMode(false);
+    setIsAutoEnterMode(true);
   };
 
   const onSelectSortKeyRef = useRef(null);
@@ -78,6 +79,15 @@ function App() {
   onCloseTabKeyRef.current = () => {
     if (panel !== Panel.Opening) return;
     closeTab(parseInt(selectedTabElementRef.current.dataset["index"]));
+  };
+
+  const onMouseWheelRef = useRef(null);
+  onMouseWheelRef.current = (event: WheelEvent) => {
+    if (!isModButtonPressed) return;
+    setIsActive(true);
+    setIndex(index + (event.deltaY > 0 ? 1 : event.deltaY < 0 ? -1 : 0));
+    setIsAutoEnterMode(true);
+    event.preventDefault();
   };
 
   const openTab = (tab: Tab) => {
@@ -200,6 +210,14 @@ function App() {
   }, [panel, sort, query]);
 
   useEffect(() => {
+    if (isModButtonPressed) return;
+    if (!selectedTabElementRef.current) return;
+    if (isAutoEnterMode) {
+      selectedTabElementRef.current.click();
+    }
+  }, [isModButtonPressed]);
+
+  useEffect(() => {
     if (config == null) return;
 
     hotkeys.filter = () => {
@@ -220,6 +238,7 @@ function App() {
       mod: boolean,
       callback: (event: KeyboardEvent) => void
     ) => {
+      if (keybinds.length == 0) return () => {};
       const _keybinds = keybinds
         .map(key => (mod ? `${config.modKey}+` : "") + `${key}`)
         .join(",");
@@ -267,6 +286,28 @@ function App() {
     bind(config.deactivateKeybinds, false, () => {
       setIsActive(false);
     });
+
+    if (config.mouseModButton != null) {
+      const modButton = config.mouseModButton.toLowerCase();
+
+      addEventListener("mousedown", event => {
+        if (modButton !== ["left", "middle", "right"][event.button]) return;
+        setIsModButtonPressed(true);
+      });
+
+      addEventListener("mouseup", event => {
+        if (modButton !== ["left", "middle", "right"][event.button]) return;
+        setIsModButtonPressed(false);
+      });
+
+      addEventListener(
+        "wheel",
+        event => {
+          onMouseWheelRef.current(event);
+        },
+        { passive: false }
+      );
+    }
   }, [config]);
 
   useEffect(() => {
@@ -347,7 +388,7 @@ function App() {
           class="container"
           ref={containerElementRef}
           onMouseMove={() => {
-            setIsAutoEnterMode(true);
+            setIsAutoEnterMode(false);
           }}
           // @ts-ignore TS2322
           tabindex="-1"
@@ -361,7 +402,7 @@ function App() {
                 ref={searchBoxElementRef}
                 onInput={e => setQuery((e.target as HTMLInputElement).value)}
                 onFocus={() => {
-                  setIsAutoEnterMode(true);
+                  setIsAutoEnterMode(false);
                 }}
               />
             </div>
