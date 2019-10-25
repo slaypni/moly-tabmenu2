@@ -70,7 +70,7 @@ browser.runtime.onStartup.addListener(async () => {
 
 browser.tabs.onActivated.addListener(async activeInfo => {
   setActivatedTabIds(
-    union([activeInfo.tabId]).concat(await getActivatedTabIds())
+    union([activeInfo.tabId].concat(await getActivatedTabIds()))
   );
 });
 

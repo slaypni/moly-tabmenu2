@@ -22,7 +22,7 @@
 
   "background": {
     "scripts": ["scripts/background.ts"],
-    "persistent": false
+    "persistent": true
   },
 
   "options_ui": { "page": "options.html", "open_in_tab": true },
