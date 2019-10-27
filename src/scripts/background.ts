@@ -1,4 +1,4 @@
-import { groupBy, pick, union, without } from "lodash-es";
+import { groupBy, isEmpty, pick, union, without } from "lodash-es";
 import { browser } from "webextension-polyfill-ts";
 
 import { Method, Sort, Message, Panel, Tab, Config } from "./types";
@@ -15,7 +15,9 @@ let style: string | null = null;
 
 async function getStyle(): Promise<string> {
   if (style == null) {
-    style = await (await fetch("styles/content.css")).text();
+    style = await (await fetch(
+      browser.runtime.getURL("styles/content.css")
+    )).text();
   }
   return style;
 }
@@ -59,6 +61,43 @@ async function getActivatedTabIds(): Promise<number[]> {
 async function setActivatedTabIds(value: number[]): Promise<void> {
   return setState(State.ActivatedTabIds, value);
 }
+
+browser.runtime.onInstalled.addListener(async () => {
+  const isClean = isEmpty(await browser.storage.local.get());
+  const version =
+    (await browser.storage.local.get("cnf-version")["cnf-version"]) || 0;
+  let message = "";
+  if (version === 0) {
+    browser.storage.local.clear();
+  }
+  if (version < 1) {
+    Object.entries({
+      version: 1,
+      mouseModButton: null,
+      modKey: "ctrl",
+      moveUpKeybinds: ["shift+q"],
+      moveDownKeybinds: ["q"],
+      moveLeftKeybinds: [],
+      moveRightKeybinds: [],
+      closeItemKeybinds: [],
+      focusOnSearchKeybinds: ["ctrl+'"],
+      selectNextSortKeybinds: [],
+      selectPrevSortKeybinds: [],
+      deactivateKeybinds: ["esc"]
+    }).forEach(([key, value]) => {
+      browser.storage.local.set({ [`cnf-${key}`]: value });
+    });
+
+    if (!isClean) {
+      message =
+        "MolyTabMenu got a major upgrade! Please set up hotkeys as you like!";
+    }
+    const url = browser.runtime.getURL("options.html");
+    browser.tabs.create({
+      url: `${url}${message ? `?message=${message}` : ""}`
+    });
+  }
+});
 
 browser.runtime.onStartup.addListener(async () => {
   await Promise.all(
@@ -168,7 +207,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
             maxResults: MAX_HISTORY_RESULT
           });
           if (!searchable) {
-            items = items.filter(doesContainQuery)
+            items = items.filter(doesContainQuery);
           }
           items = await getSortedTabs(items);
           return items.map(item => pick(item, ["id", "title", "url"]));
@@ -217,7 +256,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
       return await getStyle();
 
     case Method.CloseTab:
-      browser.tabs.remove(message.body)
-      return
+      browser.tabs.remove(message.body);
+      return;
   }
 });

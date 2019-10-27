@@ -27,9 +27,6 @@ function App() {
   onAnyKeyRef.current = (type: string) => {
     if (isActive) {
       switch (type) {
-        case "keydown":
-          // console.log("modKey keydown");
-          break;
         case "keyup":
           if (!hotkeys.isPressed(config.modKey) && isAutoEnterMode) {
             selectedTabElementRef.current.click(); // todo: should use current?.click()
@@ -117,13 +114,15 @@ function App() {
   useEffect(() => {
     if (!(isActive && style)) return;
     containerElementRef.current.addEventListener("focusout", e => {
-      //console.log(e.relatedTarget)
-      //console.log(e.target)
       const focusedTarget = e.relatedTarget as (HTMLElement | null);
-      if (!(e.target as HTMLElement).contains(focusedTarget)) {
-        //console.log("deac")
-        setIsActive(false);
-      }
+      if (
+        containerElementRef.current != null &&
+        containerElementRef.current.contains(focusedTarget) &&
+        containerElementRef.current.contains(e.target as (HTMLElement | null))
+      )
+        return;
+      if ((e.target as HTMLElement).contains(focusedTarget)) return;
+      setIsActive(false);
     });
 
     // todo: document.activeElement?.shadowRoot?.activeElement
@@ -269,22 +268,42 @@ function App() {
       onCloseTabKeyRef.current();
     });
 
-    bind(config.focusOnSearchKeybinds, false, () => {
+    const shouldBypassEvent = (event: KeyboardEvent) => {
+      const eventTarget = event.target as (HTMLElement | null);
+      const shadowTarget = (eventTarget &&
+        eventTarget.shadowRoot &&
+        eventTarget.shadowRoot.activeElement) as (HTMLElement | null);
+      return [eventTarget, shadowTarget]
+        .filter(target => target)
+        .some(
+          target =>
+            (target.isContentEditable ||
+              ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)) &&
+            !(hotkeys.command || hotkeys.ctrl || hotkeys.alt) &&
+            !/^(escape|f\d{1,2})$/i.test(event.key)
+        );
+    };
+
+    bind(config.focusOnSearchKeybinds, false, event => {
+      if (shouldBypassEvent(event)) return;
       setIsActive(true);
       setTimeout(() => {
         searchBoxElementRef.current.focus();
       });
     });
 
-    bind(config.selectPrevSortKeybinds, false, () => {
+    bind(config.selectPrevSortKeybinds, false, event => {
+      if (shouldBypassEvent(event)) return;
       onSelectSortKeyRef.current(-1);
     });
 
-    bind(config.selectNextSortKeybinds, false, () => {
+    bind(config.selectNextSortKeybinds, false, event => {
+      if (shouldBypassEvent(event)) return;
       onSelectSortKeyRef.current(1);
     });
 
-    bind(config.deactivateKeybinds, false, () => {
+    bind(config.deactivateKeybinds, false, event => {
+      if (shouldBypassEvent(event)) return;
       setIsActive(false);
     });
 

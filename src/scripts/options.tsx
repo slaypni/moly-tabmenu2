@@ -111,8 +111,15 @@ function App() {
     }, [value]);
   }
 
+  const message = new URLSearchParams(window.location.search).get("message");
+
   return (
     <div id="app">
+      {message ? (
+        <div class="message">
+          <span>{message}</span>
+        </div>
+      ) : null}
       <div class="title">
         <span class="moly">Moly</span>
         <span class="tabmenu">TabMenu</span>
@@ -281,7 +288,6 @@ function BindButton({
         .concat(event.ctrlKey ? [Mod.Ctrl] : [])
         .concat(event.altKey ? [Mod.Alt] : [])
         .concat(event.shiftKey ? [Mod.Shift] : []);
-      if (modKey == null && mods.length === 0) return;
       const code = event.keyCode || event.which || event.charCode;
       const rawKey = keyNames[code] || String.fromCharCode(code).toLowerCase();
       const newbind = sanitize(mods.concat([rawKey]).join(splitKey));
