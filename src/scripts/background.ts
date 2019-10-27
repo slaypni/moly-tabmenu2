@@ -63,9 +63,9 @@ async function setActivatedTabIds(value: number[]): Promise<void> {
 }
 
 browser.runtime.onInstalled.addListener(async () => {
-  const isClean = isEmpty(await browser.storage.local.get());
-  const version =
-    (await browser.storage.local.get("cnf-version")["cnf-version"]) || 0;
+  const config = (await browser.storage.local.get()) as {};
+  const isClean = !Object.keys(config).some(key => key.startsWith("cnf-"));
+  const version = config["cnf-version"] || 0;
   let message = "";
   if (version === 0) {
     browser.storage.local.clear();
