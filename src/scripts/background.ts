@@ -1,4 +1,4 @@
-import { groupBy, isEmpty, pick, union, without } from "lodash-es";
+import { groupBy, pick, union, without } from "lodash-es";
 import { browser } from "webextension-polyfill-ts";
 
 import { Method, Sort, Message, Panel, Tab, Config } from "./types";
@@ -64,7 +64,7 @@ async function setActivatedTabIds(value: number[]): Promise<void> {
 
 browser.runtime.onInstalled.addListener(async () => {
   const config = (await browser.storage.local.get()) as {};
-  const isClean = !Object.keys(config).some(key => key.startsWith("cnf-"));
+  const isClean = Object.keys(config).length === 0;
   const version = config["cnf-version"] || 0;
   let message = "";
   if (version === 0) {
