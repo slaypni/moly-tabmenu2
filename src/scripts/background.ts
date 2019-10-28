@@ -154,14 +154,16 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
           case Sort.Active:
             return await getTabsInActiveOrder();
           case Sort.ActiveHost:
-            const tabsByHosts = groupBy(tabs, tab => new URL(tab.url).hostname);
+            const tabsInActivateOrder = await getTabsInActiveOrder();
+            const tabsByHosts = groupBy(
+              tabsInActivateOrder,
+              tab => new URL(tab.url).hostname
+            );
             const hosts = union(
-              (await getTabsInActiveOrder()).map(
-                tab => new URL(tab.url).hostname
-              )
+              tabsInActivateOrder.map(tab => new URL(tab.url).hostname)
             );
             return hosts.flatMap(host => {
-              return [...tabsByHosts[host]].sort((a, b) => comp(a.url, b.url));
+              return tabsByHosts[host];
             });
           case Sort.Title:
             return [...tabs].sort((a, b) =>
