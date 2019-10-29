@@ -56,12 +56,14 @@ async function setState(name: string, value: any): Promise<void> {
   return await browser.storage.local.set({ [`st-${name}`]: value });
 }
 
-async function getActivatedTabIds(): Promise<number[]> {
-  return (await getState(State.ActivatedTabIds)) || ([] as number[]); // todo: should use ??
+let _activatedTabIds: number[] = []
+
+function getActivatedTabIds(): number[] {
+  return [..._activatedTabIds]
 }
 
-async function setActivatedTabIds(value: number[]): Promise<void> {
-  return setState(State.ActivatedTabIds, value);
+function setActivatedTabIds(value: number[]): void {
+  _activatedTabIds = [...value]
 }
 
 const _dataUrlCache = new LRUMap(MAX_FAVICON_DATA_CACHE);
@@ -134,12 +136,12 @@ browser.runtime.onStartup.addListener(async () => {
 
 browser.tabs.onActivated.addListener(async activeInfo => {
   setActivatedTabIds(
-    union([activeInfo.tabId].concat(await getActivatedTabIds()))
+    union([activeInfo.tabId].concat(getActivatedTabIds()))
   );
 });
 
 browser.tabs.onRemoved.addListener(async tabId => {
-  setActivatedTabIds(without(await getActivatedTabIds(), tabId));
+  setActivatedTabIds(without(getActivatedTabIds(), tabId));
 });
 
 browser.runtime.onMessage.addListener(async (message: Message, sender) => {
@@ -163,7 +165,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
         const getTabsInActiveOrder = async (): Promise<T[]> => {
           const tabsMap = getTabsMap();
           return union(
-            ((await getActivatedTabIds()) as (number | string)[]).concat(
+            ((getActivatedTabIds()) as (number | string)[]).concat(
               tabs.map(tab => tab.id)
             )
           )
