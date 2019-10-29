@@ -224,6 +224,9 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
               favIconUrl: session.tab.favIconUrl,
               windowId: session.tab.windowId
             }));
+          if (message.query) {
+            tabs = tabs.filter(doesContainQuery);
+          }
           return await getSortedTabs(tabs);
         }
 
