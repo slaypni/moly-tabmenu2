@@ -177,6 +177,21 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
         return tabs;
       };
 
+      const toDataUrl = async (url: string): Promise<string | null> => {
+        return new Promise((resolve, reject) => {
+          const req = new XMLHttpRequest();
+          req.open("GET", url, true);
+          req.responseType = "blob";
+          req.addEventListener("load", function() {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(this.response);
+          });
+          req.send();
+        });
+      };
+
       switch (message.panel) {
         case Panel.Opening: {
           let tabs = await browser.tabs.query({ currentWindow: true });
@@ -212,7 +227,14 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
             items = items.filter(doesContainQuery);
           }
           items = await getSortedTabs(items);
-          return items.map(item => pick(item, ["id", "title", "url"]));
+          return await Promise.all(
+            items.map(async item =>
+              Object.assign(
+                { favIconUrl: await toDataUrl(`chrome://favicon/${item.url}`) },
+                pick(item, ["id", "title", "url"])
+              )
+            )
+          );
         }
       }
 

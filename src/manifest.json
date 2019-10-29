@@ -27,5 +27,5 @@
 
   "options_ui": { "page": "options.html", "open_in_tab": true },
 
-  "permissions": ["tabs", "storage", "sessions", "history"]
+  "permissions": ["tabs", "storage", "sessions", "history", "chrome://favicon/"]
 }
