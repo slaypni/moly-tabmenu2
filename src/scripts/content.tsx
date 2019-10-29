@@ -43,6 +43,7 @@ function App() {
     setIsActive(true);
     setIndex(index + offset);
     setIsAutoEnterMode(true);
+    containerElementRef.current && containerElementRef.current.focus();
   };
 
   const onMovePanelKeyRef = useRef(null);
@@ -64,6 +65,7 @@ function App() {
     setIsActive(true);
     setPanel(i);
     setIsAutoEnterMode(true);
+    containerElementRef.current && containerElementRef.current.focus();
   };
 
   const onSelectSortKeyRef = useRef(null);
@@ -114,6 +116,33 @@ function App() {
     }
   };
 
+  const getLeafActiveElement = (): Element | null => {
+    const _getLeafActiveElement = (activeElement: Element): Element => {
+      const childActiveElement =
+        activeElement.shadowRoot && activeElement.shadowRoot.activeElement; // todo: use ?.
+      return childActiveElement != null
+        ? _getLeafActiveElement(childActiveElement)
+        : activeElement;
+    };
+    return (
+      document.activeElement && _getLeafActiveElement(document.activeElement)
+    );
+  };
+
+  const isEditableTargeted = (event: Event): boolean => {
+    const eventTarget = event.target as (HTMLElement | null);
+    const shadowTarget = (eventTarget &&
+      eventTarget.shadowRoot &&
+      eventTarget.shadowRoot.activeElement) as (HTMLElement | null);
+    return [eventTarget, shadowTarget]
+      .filter(target => target)
+      .some(
+        target =>
+          target.isContentEditable ||
+          ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)
+      );
+  };
+
   useEffect(() => {
     if (!(isActive && style)) return;
     containerElementRef.current.addEventListener("focusout", e => {
@@ -128,13 +157,7 @@ function App() {
       setIsActive(false);
     });
 
-    // todo: document.activeElement?.shadowRoot?.activeElement
-    const focusedElement =
-      document.activeElement &&
-      document.activeElement.shadowRoot &&
-      document.activeElement.shadowRoot.activeElement;
-
-    if (!containerElementRef.current.contains(focusedElement)) {
+    if (!containerElementRef.current.contains(getLeafActiveElement())) {
       containerElementRef.current.focus();
     }
   }, [isActive, style]);
@@ -271,20 +294,12 @@ function App() {
       onCloseTabKeyRef.current();
     });
 
-    const shouldBypassEvent = (event: KeyboardEvent) => {
-      const eventTarget = event.target as (HTMLElement | null);
-      const shadowTarget = (eventTarget &&
-        eventTarget.shadowRoot &&
-        eventTarget.shadowRoot.activeElement) as (HTMLElement | null);
-      return [eventTarget, shadowTarget]
-        .filter(target => target)
-        .some(
-          target =>
-            (target.isContentEditable ||
-              ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)) &&
-            !(hotkeys.command || hotkeys.ctrl || hotkeys.alt) &&
-            !/^(escape|f\d{1,2})$/i.test(event.key)
-        );
+    const shouldBypassEvent = (event: KeyboardEvent): boolean => {
+      return (
+        isEditableTargeted(event) &&
+        !(hotkeys.command || hotkeys.ctrl || hotkeys.alt) &&
+        !/^(escape|f\d{1,2})$/i.test(event.key)
+      );
     };
 
     bind(config.focusOnSearchKeybinds, false, event => {
