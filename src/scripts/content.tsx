@@ -13,6 +13,9 @@ function App() {
   const [index, setIndex] = useState<number>(0);
   const [isAutoEnterMode, setIsAutoEnterMode] = useState<boolean>(false);
   const [isModButtonPressed, setIsModButtonPressed] = useState<boolean>(false);
+  const [faviconDataUrls, setFaviconDataUrls] = useState<{
+    [url: string]: string | null;
+  }>({});
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -378,12 +381,24 @@ function App() {
             >
               <img
                 class={"favicon" + (tab.favIconUrl ? "" : " hidden")}
-                src={tab.favIconUrl}
+                src={faviconDataUrls[tab.url] || tab.favIconUrl}
                 // @ts-ignore TS2322
                 loading="lazy"
                 decoding="async"
                 width="16"
                 height="16"
+                onError={() => {
+                  if (faviconDataUrls[tab.url] !== undefined) return;
+                  chrome.runtime.sendMessage(
+                    { method: Method.GetFaviconDataUrl, body: tab.url },
+                    (url: string) => {
+                      setFaviconDataUrls({
+                        ...faviconDataUrls,
+                        [tab.url]: url || null
+                      });
+                    }
+                  );
+                }}
               />
               <span class="title">{tab.title}</span>
               <div class="grad"></div>

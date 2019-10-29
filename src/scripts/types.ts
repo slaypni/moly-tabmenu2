@@ -7,7 +7,8 @@ export enum Method {
   SetLastSort,
   GetConfig,
   GetStyle,
-  CloseTab
+  CloseTab,
+  GetFaviconDataUrl
 }
 
 export enum Sort {
