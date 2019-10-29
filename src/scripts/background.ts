@@ -1,4 +1,5 @@
 import { groupBy, pick, union, without } from "lodash-es";
+import { LRUMap } from "lru_map";
 import { browser } from "webextension-polyfill-ts";
 
 import { Method, Sort, Message, Panel, Tab, Config } from "./types";
@@ -10,16 +11,17 @@ enum State {
 }
 
 const MAX_HISTORY_RESULT = 200;
+const MAX_FAVICON_DATA_CACHE = 1000;
 
-let style: string | null = null;
+let _style: string | null = null;
 
 async function getStyle(): Promise<string> {
-  if (style == null) {
-    style = await (await fetch(
+  if (_style == null) {
+    _style = await (await fetch(
       browser.runtime.getURL("styles/content.css")
     )).text();
   }
-  return style;
+  return _style;
 }
 
 async function getConfig(): Promise<Config> {
@@ -62,14 +64,22 @@ async function setActivatedTabIds(value: number[]): Promise<void> {
   return setState(State.ActivatedTabIds, value);
 }
 
+const _dataUrlCache = new LRUMap(MAX_FAVICON_DATA_CACHE);
+
 async function toDataUrl(url: string): Promise<string | null> {
+  const cached = _dataUrlCache.get(url);
+  if (cached !== undefined) return cached as (string | null);
+
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = "blob";
     req.addEventListener("load", function() {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
+      reader.onloadend = () => {
+        _dataUrlCache.set(url, reader.result);
+        resolve(reader.result as string);
+      };
       reader.onerror = reject;
       reader.readAsDataURL(this.response);
     });
