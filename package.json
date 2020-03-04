@@ -9,13 +9,13 @@
     "parcel-plugin-web-extension": "^1.5.2",
     "stylus": "^0.54.7",
     "ts-node": "^8.4.1",
-    "typescript": "^3.7.1-rc"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "hotkeys-js": "^3.7.2",
     "lodash-es": "^4.17.15",
     "lru_map": "^0.3.3",
-    "preact": "^10.0.2",
+    "preact": "^10.3.3",
     "purecss": "^1.0.1",
     "webextension-polyfill-ts": "^0.10.0"
   },
