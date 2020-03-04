@@ -14,7 +14,7 @@
     {
       "matches": ["*://*/*"],
       "js": ["scripts/content.tsx"],
-      "css": ["styles/content.styl"],
+      "css": ["styles/content-light.styl", "styles/content-dark.styl"],
       "run_at": "document_start",
       "all_frames": false
     }

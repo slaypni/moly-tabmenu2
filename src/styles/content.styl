@@ -3,199 +3,194 @@ font-size = 14px
 width = 400px
 padding-lr = 10px
 
-color-p = #37474f
-color-p-light = #62727b
-color-p-dark = #102027
-color-s = #0277bd
-color-s-light = #58a5f0
-color-s-dark = #004c8c
+molytabmenu(
+  text-color,
+  light-color,
+  bg-color,
+  border-color,
+  line-color,
+  highlighted-color,
+  highlighted-bg-color,
+  highlighted-line-color,
+  search-bg-color
+)
 
-#molytabmenu
-  all: initial
-  position: fixed
-  z-index: 2147483647
-  width: 0
-  height: 0
-  pointer-events: none
-  background-color: rgba(0, 0, 0, 0)
-
-  --color: rgba(0, 0, 0, 0.87)
-  --highlighted-color: white
-  --light-color: gray
-  --bg-color: white
-  --highlighted-bg-color: color-s-dark
-  --border-color: gray
-  --line-color: gray
-  --highlighted-line-color: color-s-light
-  --search-bg-color: rgba(0, 0, 0, 0.13)
-
-#molytabmenu-app
-  .container
+  #molytabmenu
     all: initial
     position: fixed
     z-index: 2147483647
-    left: calc(-50vw + 50%)
-    right: calc(-50vw + 50%)
-    margin: 10px auto
-    top: 0
-    padding: 8px 0
-    width: width
-    max-height: 100vh
-    box-sizing: border-box
-    overflow-x: hidden
-    overflow-y: hidden
-    background-color: var(--bg-color)
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.3)
-    border-radius: border-radius
-    pointer-events: auto
+    width: 0
+    height: 0
+    pointer-events: none
+    background-color: rgba(0, 0, 0, 0)
 
-    color: var(--color)
-    font-size: font-size
-    text-align: left
-    font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif
+  #molytabmenu-app
+    .container
+      all: initial
+      position: fixed
+      z-index: 2147483647
+      left: calc(-50vw + 50%)
+      right: calc(-50vw + 50%)
+      margin: 10px auto
+      top: 0
+      padding: 8px 0
+      width: width
+      max-height: 100vh
+      box-sizing: border-box
+      overflow-x: hidden
+      overflow-y: hidden
+      background-color: bg-color
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.3)
+      border-radius: border-radius
+      pointer-events: auto
 
-  .top
-    display: flex
-    flex-flow: row nowrap
-    align-items: center
-    height: 28px
-    margin-bottom: 2px
-    padding: 0 padding-lr
+      color: text-color
+      font-size: font-size
+      text-align: left
+      font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif
+
+    .top
+      display: flex
+      flex-flow: row nowrap
+      align-items: center
+      height: 28px
+      margin-bottom: 2px
+      padding: 0 padding-lr
+
+      .search
+        margin-right: 8px
+
+    .label
+      font-size: font-size - 2px
+      color: light-color
 
     .search
-      margin-right: 8px
-
-  .label
-    font-size: font-size - 2px
-    color: var(--light-color)
-
-  .search
-    box-sizing: border-box
-    flex-grow: 1
-    display inline-flex
-    cursor: text
-
-    input
+      box-sizing: border-box
       flex-grow: 1
-      color: var(--color)
-      padding: 6px 10px
-      height: font-size - 1px
-      border: 0
-      border-radius: border-radius
-      box-sizing: content-box
-      background-color: var(--search-bg-color)
-      font-size: font-size - 1px
-      line-height: font-size
+      display inline-flex
+      cursor: text
 
-      &:focus
-        outline: 0
+      input
+        flex-grow: 1
+        color: text-color
+        padding: 6px 10px
+        height: font-size - 1px
+        border: 0
+        border-radius: border-radius
+        box-sizing: content-box
+        background-color: search-bg-color
+        font-size: font-size - 1px
+        line-height: font-size
 
-  .category
-    display: flex
-    flex-flow: row nowrap
-    justify-content: space-between
-    margin-bottom: 10px
-    padding: 0 padding-lr
+        &:focus
+          outline: 0
 
-    .panel
-      width: 32.5%
-      height: 24px
-      line-height: 24px
-      font-size: font-size - 2px
-      text-align: center
-      border-bottom: 1px solid var(--line-color)
-      cursor: pointer
+    .category
+      display: flex
+      flex-flow: row nowrap
+      justify-content: space-between
+      margin-bottom: 10px
+      padding: 0 padding-lr
 
-      &.activated
-        cursor: default
-        border-bottom: 1px solid var(--highlighted-line-color)
+      .panel
+        width: 32.5%
+        height: 24px
+        line-height: 24px
+        font-size: font-size - 2px
+        text-align: center
+        border-bottom: 1px solid line-color
+        cursor: pointer
 
-      &:not(.activated)
-        color: var(--light-color)
+        &.activated
+          cursor: default
+          border-bottom: 1px solid highlighted-line-color
 
-  .select
-    display: inline
-    margin-left: 8px
+        &:not(.activated)
+          color: light-color
 
-    select
-      font-size: font-size
-      color: var(--color)
-      cursor: pointer
-      user-select: none
-      box-sizing: content-box
-      padding: 0 0 4px
-      border: 0
-      border-bottom: 1px solid var(--line-color)
-      border-radius: 0
-      width: 100px
-      height: font-size
-      background: none
-      -webkit-appearance: none
-      -moz-appearance: none
+    .select
+      display: inline
+      margin-left: 8px
 
-    svg
-      fill: var(--color)
-      transform: translate(-14px, 0.3em)
-      position: absolute
-      pointer-events: none
+      select
+        font-size: font-size
+        color: text-color
+        cursor: pointer
+        user-select: none
+        box-sizing: content-box
+        padding: 0 0 4px
+        border: 0
+        border-bottom: 1px solid line-color
+        border-radius: 0
+        width: 100px
+        height: font-size
+        background: none
+        -webkit-appearance: none
+        -moz-appearance: none
 
-      width: 1em
-      height: 1em
-      display: inline-block
-      user-select: none
-
-  .tabs
-    overflow-y: auto
-    max-height: calc(100vh - 103px)
-    line-height: 26px
-
-    .tab
-      position: relative
-      padding: 0 (padding-lr + 16px) 0 padding-lr
-      cursor: pointer
-      text-overflow: ''
-      word-wrap: break-word
-      white-space: nowrap
-      overflow: hidden
-      &.selected
-        color: var(--highlighted-color)
-        background-color: var(--highlighted-bg-color)
-
-      .favicon
-        margin-right: 8px
-        width: 16px
-        height: 16px
-        vertical-align: middle
-        &.hidden
-          visibility: hidden
-
-      .grad
-        display: inline
+      svg
+        fill: text-color
+        transform: translate(-14px, 0.3em)
         position: absolute
-        right: 0
-        height: 26px
         pointer-events: none
 
-      &.selected .grad
-        width: 80px
-        background: linear-gradient(90deg, transparent, var(--highlighted-bg-color) 40px)
+        width: 1em
+        height: 1em
+        display: inline-block
+        user-select: none
 
-      &:not(.selected) .grad
-        width: 50px
-        background: linear-gradient(90deg, transparent, var(--bg-color) 40px)
+    .tabs
+      overflow-y: auto
+      max-height: calc(100vh - 103px)
+      line-height: 26px
 
-      .close
-        position: absolute
-        display: inline-flex
-        justify-content: center
-        align-items: center
-        right: 10px
-        height: 24px
+      .tab
+        position: relative
+        padding: 0 (padding-lr + 16px) 0 padding-lr
+        cursor: pointer
+        text-overflow: ''
+        word-wrap: break-word
+        white-space: nowrap
+        overflow: hidden
+        &.selected
+          color: highlighted-color
+          background-color: highlighted-bg-color
 
-        svg
-          fill: var(--highlighted-color)
+        .favicon
+          margin-right: 8px
+          width: 16px
+          height: 16px
+          vertical-align: middle
+          &.hidden
+            visibility: hidden
 
-        &:hover svg
-          background-color: rgba(white, 0.5)
-          border-radius: 12px
+        .grad
+          display: inline
+          position: absolute
+          right: 0
+          height: 26px
+          pointer-events: none
+
+        &.selected .grad
+          width: 80px
+          background: linear-gradient(90deg, transparent, highlighted-bg-color 40px)
+
+        &:not(.selected) .grad
+          width: 50px
+          background: linear-gradient(90deg, transparent, bg-color 40px)
+
+        .close
+          position: absolute
+          display: inline-flex
+          justify-content: center
+          align-items: center
+          right: 10px
+          height: 24px
+
+          svg
+            fill: highlighted-color
+
+          &:hover svg
+            background-color: rgba(white, 0.5)
+            border-radius: 12px
 

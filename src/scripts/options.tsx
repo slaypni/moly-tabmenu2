@@ -57,6 +57,7 @@ enum Mod {
 function App() {
   const [mouseModButton, setMouseModButton] = useState<string | null>(null);
   const [modKey, setModKey] = useState<string | null>(Mod.Ctrl);
+  const [theme, setTheme] = useState<string>("light");
   const [moveUpKeybinds, setMoveUpKeybinds] = useState([]);
   const [moveDownKeybinds, setMoveDownKeybinds] = useState([]);
   const [moveLeftKeybinds, setMoveLeftKeybinds] = useState([]);
@@ -74,6 +75,7 @@ function App() {
       for (let [kv, setState] of [
         [{ mouseModButton }, setMouseModButton],
         [{ modKey }, setModKey],
+        [{ theme }, setTheme],
         [{ moveUpKeybinds }, setMoveUpKeybinds],
         [{ moveDownKeybinds }, setMoveDownKeybinds],
         [{ moveLeftKeybinds }, setMoveLeftKeybinds],
@@ -95,6 +97,7 @@ function App() {
   for (let [key, value] of Object.entries({
     mouseModButton,
     modKey,
+    theme,
     moveUpKeybinds,
     moveDownKeybinds,
     moveLeftKeybinds,
@@ -154,7 +157,7 @@ function App() {
         <fieldset>
           <div class="item pure-g">
             <div class="description pure-u-2-5">
-              <span>Modifier Key for hot keys</span>
+              <span>Modifier key for hot keys</span>
             </div>
             <div class="content pure-u-3-5">
               <select
@@ -167,6 +170,25 @@ function App() {
                 <option value={Mod.Ctrl}>{Mod.Ctrl}</option>
                 <option value={Mod.Alt}>{Mod.Alt}</option>
                 <option value={Mod.Shift}>{Mod.Shift}</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="item pure-g">
+            <div class="description pure-u-2-5">
+              <span>Color theme</span>
+            </div>
+            <div class="content pure-u-3-5">
+              <select
+                value={theme || "light"}
+                onInput={e => {
+                  setTheme((e.target as HTMLSelectElement).value);
+                }}
+              >
+                <option value="light">light</option>
+                <option value="dark">dark</option>
               </select>
             </div>
           </div>

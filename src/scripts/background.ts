@@ -13,15 +13,16 @@ enum State {
 const MAX_HISTORY_RESULT = 200;
 const MAX_FAVICON_DATA_CACHE = 1000;
 
-let _style: string | null = null;
+let _styles = {};
 
 async function getStyle(): Promise<string> {
-  if (_style == null) {
-    _style = await (await fetch(
-      browser.runtime.getURL("styles/content.css")
-    )).text();
+  const theme = (await browser.storage.local.get("cnf-theme"))["cnf-theme"];
+  if (_styles[theme] == null) {
+    _styles[theme] = await (
+      await fetch(browser.runtime.getURL(`styles/content-${theme}.css`))
+    ).text();
   }
-  return _style;
+  return _styles[theme];
 }
 
 async function getConfig(): Promise<Config> {
@@ -56,21 +57,21 @@ async function setState(name: string, value: any): Promise<void> {
   return await browser.storage.local.set({ [`st-${name}`]: value });
 }
 
-let _activatedTabIds: number[] = []
+let _activatedTabIds: number[] = [];
 
 function getActivatedTabIds(): number[] {
-  return [..._activatedTabIds]
+  return [..._activatedTabIds];
 }
 
 function setActivatedTabIds(value: number[]): void {
-  _activatedTabIds = [...value]
+  _activatedTabIds = [...value];
 }
 
 const _dataUrlCache = new LRUMap(MAX_FAVICON_DATA_CACHE);
 
 async function toDataUrl(url: string): Promise<string | null> {
   const cached = _dataUrlCache.get(url);
-  if (cached !== undefined) return cached as (string | null);
+  if (cached !== undefined) return cached as string | null;
 
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
@@ -94,9 +95,11 @@ browser.runtime.onInstalled.addListener(async () => {
   const isClean = Object.keys(config).length === 0;
   const version = config["cnf-version"] || 0;
   let message = "";
+
   if (version === 0) {
     browser.storage.local.clear();
   }
+
   if (version < 1) {
     Object.entries({
       version: 1,
@@ -124,6 +127,15 @@ browser.runtime.onInstalled.addListener(async () => {
       url: `${url}${message ? `?message=${message}` : ""}`
     });
   }
+
+  if (version < 2) {
+    Object.entries({
+      version: 2,
+      theme: "light"
+    }).forEach(([key, value]) => {
+      browser.storage.local.set({ [`cnf-${key}`]: value });
+    });
+  }
 });
 
 browser.runtime.onStartup.addListener(async () => {
@@ -135,9 +147,7 @@ browser.runtime.onStartup.addListener(async () => {
 });
 
 browser.tabs.onActivated.addListener(async activeInfo => {
-  setActivatedTabIds(
-    union([activeInfo.tabId].concat(getActivatedTabIds()))
-  );
+  setActivatedTabIds(union([activeInfo.tabId].concat(getActivatedTabIds())));
 });
 
 browser.tabs.onRemoved.addListener(async tabId => {
@@ -165,7 +175,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
         const getTabsInActiveOrder = async (): Promise<T[]> => {
           const tabsMap = getTabsMap();
           return union(
-            ((getActivatedTabIds()) as (number | string)[]).concat(
+            (getActivatedTabIds() as (number | string)[]).concat(
               tabs.map(tab => tab.id)
             )
           )
