@@ -25,6 +25,9 @@ function App() {
   const sortSelectElementRef = useRef<HTMLSelectElement | null>(null);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
   const rememberLastPanel = false;
+  const [appElement] = useState<HTMLElement | null>(
+    document.getElementById("molytabmenu")
+  );
 
   const onAnyKeyRef = useRef(null);
   onAnyKeyRef.current = (type: string) => {
@@ -130,10 +133,10 @@ function App() {
   };
 
   const isEditableTargeted = (event: Event): boolean => {
-    const eventTarget = event.target as (HTMLElement | null);
+    const eventTarget = event.target as HTMLElement | null;
     const shadowTarget = (eventTarget &&
       eventTarget.shadowRoot &&
-      eventTarget.shadowRoot.activeElement) as (HTMLElement | null);
+      eventTarget.shadowRoot.activeElement) as HTMLElement | null;
     return [eventTarget, shadowTarget]
       .filter(target => target)
       .some(
@@ -146,11 +149,11 @@ function App() {
   useEffect(() => {
     if (!(isActive && style)) return;
     containerElementRef.current.addEventListener("focusout", e => {
-      const focusedTarget = e.relatedTarget as (HTMLElement | null);
+      const focusedTarget = e.relatedTarget as HTMLElement | null;
       if (
         containerElementRef.current != null &&
         containerElementRef.current.contains(focusedTarget) &&
-        containerElementRef.current.contains(e.target as (HTMLElement | null))
+        containerElementRef.current.contains(e.target as HTMLElement | null)
       )
         return;
       if ((e.target as HTMLElement).contains(focusedTarget)) return;
@@ -173,6 +176,9 @@ function App() {
       }
       if (sort == null) {
         chrome.runtime.sendMessage({ method: Method.GetLastSort }, setSort);
+      }
+      if (!document.body.contains(appElement)) {
+        document.body.prepend(appElement);
       }
     } else {
       setQuery("");
