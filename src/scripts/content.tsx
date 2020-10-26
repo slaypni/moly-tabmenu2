@@ -29,14 +29,16 @@ function App() {
   );
 
   const onAnyKeyRef = useRef(null);
-  onAnyKeyRef.current = (type: string) => {
+  onAnyKeyRef.current = (event: KeyboardEvent) => {
     if (isActive) {
-      switch (type) {
+      switch (event.type) {
         case "keyup":
           if (!hotkeys.isPressed(config.modKey) && isAutoEnterMode) {
             selectedTabElementRef.current?.click();
           }
           break;
+        case "keydown":
+          event.stopImmediatePropagation();
       }
     }
   };
@@ -253,8 +255,8 @@ function App() {
       return true;
     };
 
-    hotkeys("*", { keyup: true }, (event) => {
-      onAnyKeyRef.current(event.type);
+    hotkeys("*", { keydown: true, keyup: true }, (event) => {
+      onAnyKeyRef.current(event);
     });
 
     hotkeys("enter", { keyup: true }, () => {
