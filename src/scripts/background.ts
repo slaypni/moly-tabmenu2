@@ -159,9 +159,9 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
       const doesContainQuery = (tab: Tab): boolean => {
         const query = message.query.toLowerCase();
         return (
-          (tab.title || "").toLowerCase().indexOf(query) != -1 ||
-          (tab.url || "").toLowerCase().indexOf(query) != -1
-        ); // todo: should use ??
+          (tab.title ?? "").toLowerCase().indexOf(query) != -1 ||
+          (tab.url ?? "").toLowerCase().indexOf(query) != -1
+        );
       };
 
       const comp = (a: any, b: any) => (a == b ? 0 : a < b ? -1 : 1);
@@ -284,14 +284,14 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
       }
 
     case Method.GetLastPanel:
-      return (await getState(State.LastPanel)) || Panel.Opening; // todo: should use ??
+      return (await getState(State.LastPanel)) ?? Panel.Opening;
 
     case Method.SetLastPanel:
       setState(State.LastPanel, message.body);
       return;
 
     case Method.GetLastSort:
-      return (await getState(State.LastSort)) || Sort.Active; // todo: should use ??
+      return (await getState(State.LastSort)) ?? Sort.Active;
 
     case Method.SetLastSort:
       setState(State.LastSort, message.body);

@@ -34,7 +34,7 @@ function App() {
       switch (type) {
         case "keyup":
           if (!hotkeys.isPressed(config.modKey) && isAutoEnterMode) {
-            selectedTabElementRef.current.click(); // todo: should use current?.click()
+            selectedTabElementRef.current?.click();
           }
           break;
       }
@@ -120,8 +120,7 @@ function App() {
 
   const getLeafActiveElement = (): Element | null => {
     const _getLeafActiveElement = (activeElement: Element): Element => {
-      const childActiveElement =
-        activeElement.shadowRoot && activeElement.shadowRoot.activeElement; // todo: use ?.
+      const childActiveElement = activeElement.shadowRoot?.activeElement;
       return childActiveElement != null
         ? _getLeafActiveElement(childActiveElement)
         : activeElement;
@@ -242,9 +241,8 @@ function App() {
 
   useEffect(() => {
     if (isModButtonPressed) return;
-    if (!selectedTabElementRef.current) return;
     if (isAutoEnterMode) {
-      selectedTabElementRef.current.click();
+      selectedTabElementRef.current?.click();
     }
   }, [isModButtonPressed]);
 
@@ -260,8 +258,7 @@ function App() {
     });
 
     hotkeys("enter", { keyup: true }, () => {
-      if (!selectedTabElementRef.current) return;
-      selectedTabElementRef.current.click();
+      selectedTabElementRef.current?.click();
     });
 
     const bind = (
