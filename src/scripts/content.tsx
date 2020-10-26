@@ -1,8 +1,7 @@
 import hotkeys from "hotkeys-js";
-import { h, render, JSX, Fragment } from "preact";
-import { useEffect, useState, useRef } from "preact/hooks";
-
-import { Method, Sort, Message, Panel, Tab, Config } from "./types";
+import { Fragment, h, JSX, render } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { Config, Method, Panel, Sort, Tab } from "./types";
 
 function App() {
   const [isActive, setIsActive] = useState<boolean>(false);
@@ -19,9 +18,9 @@ function App() {
   const [config, setConfig] = useState<Config | null>(null);
   const [style, setStyle] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const selectedTabsElementRef = useRef<HTMLElement | null>(null);
-  const selectedTabElementRef = useRef<HTMLElement | null>(null);
-  const searchBoxElementRef = useRef<HTMLElement | null>(null);
+  const selectedTabsElementRef = useRef<HTMLDivElement | null>(null);
+  const selectedTabElementRef = useRef<HTMLDivElement | null>(null);
+  const searchBoxElementRef = useRef<HTMLInputElement | null>(null);
   const sortSelectElementRef = useRef<HTMLSelectElement | null>(null);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
   const rememberLastPanel = false;
@@ -54,7 +53,7 @@ function App() {
     const panelIndexes = {
       [Panel.Opening]: 0,
       [Panel.Closed]: 1,
-      [Panel.History]: 2
+      [Panel.History]: 2,
     };
     const panelsCount = Object.keys(panelIndexes).length;
 
@@ -100,7 +99,7 @@ function App() {
     chrome.runtime.sendMessage({
       method: Method.OpenTab,
       panel: panel,
-      body: panel !== Panel.History ? tab.id : tab.url
+      body: panel !== Panel.History ? tab.id : tab.url,
     });
     setIsActive(false);
   };
@@ -109,9 +108,9 @@ function App() {
     if (panel !== Panel.Opening) return;
     chrome.runtime.sendMessage({
       method: Method.CloseTab,
-      body: tabId
+      body: tabId,
     });
-    const i = tabs.findIndex(t => t.id === tabId);
+    const i = tabs.findIndex((t) => t.id === tabId);
     if (i !== -1) {
       const _tabs = [...tabs];
       _tabs.splice(i, 1);
@@ -138,9 +137,9 @@ function App() {
       eventTarget.shadowRoot &&
       eventTarget.shadowRoot.activeElement) as HTMLElement | null;
     return [eventTarget, shadowTarget]
-      .filter(target => target)
+      .filter((target) => target)
       .some(
-        target =>
+        (target) =>
           target.isContentEditable ||
           ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName)
       );
@@ -148,7 +147,7 @@ function App() {
 
   useEffect(() => {
     if (!(isActive && style)) return;
-    containerElementRef.current.addEventListener("focusout", e => {
+    containerElementRef.current.addEventListener("focusout", (e) => {
       const focusedTarget = e.relatedTarget as HTMLElement | null;
       if (
         containerElementRef.current != null &&
@@ -234,7 +233,7 @@ function App() {
     if (!isActive || panel == null || sort == null) return;
     chrome.runtime.sendMessage(
       { method: Method.GetTabs, panel: panel, sort: sort, query: query },
-      tabs => {
+      (tabs) => {
         setTabs(tabs);
         setIsInitialized(true);
       }
@@ -256,7 +255,7 @@ function App() {
       return true;
     };
 
-    hotkeys("*", { keyup: true }, event => {
+    hotkeys("*", { keyup: true }, (event) => {
       onAnyKeyRef.current(event.type);
     });
 
@@ -272,7 +271,7 @@ function App() {
     ) => {
       if (keybinds.length == 0) return () => {};
       const _keybinds = keybinds
-        .map(key => (mod ? `${config.modKey}+` : "") + `${key}`)
+        .map((key) => (mod ? `${config.modKey}+` : "") + `${key}`)
         .join(",");
       hotkeys(_keybinds, callback);
       return () => {
@@ -308,7 +307,7 @@ function App() {
       );
     };
 
-    bind(config.focusOnSearchKeybinds, false, event => {
+    bind(config.focusOnSearchKeybinds, false, (event) => {
       if (shouldBypassEvent(event)) return;
       setIsActive(true);
       setTimeout(() => {
@@ -316,17 +315,17 @@ function App() {
       });
     });
 
-    bind(config.selectPrevSortKeybinds, false, event => {
+    bind(config.selectPrevSortKeybinds, false, (event) => {
       if (shouldBypassEvent(event)) return;
       onSelectSortKeyRef.current(-1);
     });
 
-    bind(config.selectNextSortKeybinds, false, event => {
+    bind(config.selectNextSortKeybinds, false, (event) => {
       if (shouldBypassEvent(event)) return;
       onSelectSortKeyRef.current(1);
     });
 
-    bind(config.deactivateKeybinds, false, event => {
+    bind(config.deactivateKeybinds, false, (event) => {
       if (shouldBypassEvent(event)) return;
       setIsActive(false);
     });
@@ -336,7 +335,7 @@ function App() {
 
       addEventListener(
         "mousedown",
-        event => {
+        (event) => {
           if (modButton !== ["left", "middle", "right"][event.button]) return;
           setIsModButtonPressed(true);
         },
@@ -345,7 +344,7 @@ function App() {
 
       addEventListener(
         "mouseup",
-        event => {
+        (event) => {
           if (modButton !== ["left", "middle", "right"][event.button]) return;
           setIsModButtonPressed(false);
         },
@@ -354,7 +353,7 @@ function App() {
 
       addEventListener(
         "wheel",
-        event => {
+        (event) => {
           onMouseWheelRef.current(event);
         },
         { capture: true, passive: false }
@@ -403,8 +402,8 @@ function App() {
               <img
                 class={"favicon" + (tab.favIconUrl ? "" : " hidden")}
                 src={faviconDataUrls[tab.url] || tab.favIconUrl}
-                // @ts-ignore TS2322
                 loading="lazy"
+                // @ts-ignore TS2322
                 decoding="async"
                 width="16"
                 height="16"
@@ -415,7 +414,7 @@ function App() {
                     (url: string) => {
                       setFaviconDataUrls({
                         ...faviconDataUrls,
-                        [tab.url]: url || null
+                        [tab.url]: url || null,
                       });
                     }
                   );
@@ -426,7 +425,7 @@ function App() {
               {panel === Panel.Opening && isSelected ? (
                 <div
                   class="close"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     closeTab(tab.id as number);
                   }}
@@ -464,7 +463,7 @@ function App() {
                 type="text"
                 placeholder="Search"
                 ref={searchBoxElementRef}
-                onInput={e => setQuery((e.target as HTMLInputElement).value)}
+                onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
                 onFocus={() => {
                   setIsAutoEnterMode(false);
                 }}
@@ -476,7 +475,7 @@ function App() {
                 <select
                   value={sort}
                   ref={sortSelectElementRef}
-                  onInput={e => {
+                  onInput={(e) => {
                     setSort(parseInt((e.target as HTMLSelectElement).value));
                   }}
                 >
@@ -529,13 +528,13 @@ if (document.body != null) {
     characterData: false,
     characterDataOldValue: false,
     childList: true,
-    subtree: true
+    subtree: true,
   });
 
   document.addEventListener(
     "readystatechange",
-    event => {
-      switch (event.target.readyState) {
+    () => {
+      switch (document.readyState) {
         case "interactive":
         case "complete":
           insertApp();

@@ -1,13 +1,12 @@
 import { groupBy, pick, union, without } from "lodash-es";
 import { LRUMap } from "lru_map";
 import { browser } from "webextension-polyfill-ts";
-
-import { Method, Sort, Message, Panel, Tab, Config } from "./types";
+import { Config, Message, Method, Panel, Sort, Tab } from "./types";
 
 enum State {
   ActivatedTabIds = "ActivatedTabIds",
   LastPanel = "LastPanel",
-  LastSort = "LastSort"
+  LastSort = "LastSort",
 }
 
 const MAX_HISTORY_RESULT = 200;
@@ -40,8 +39,8 @@ async function getConfig(): Promise<Config> {
       "focusOnSearchKeybinds",
       "selectNextSortKeybinds",
       "selectPrevSortKeybinds",
-      "deactivateKeybinds"
-    ].map(k => ({ [k]: cnf[`cnf-${k}`] }))
+      "deactivateKeybinds",
+    ].map((k) => ({ [k]: cnf[`cnf-${k}`] }))
   );
 }
 
@@ -77,7 +76,7 @@ async function toDataUrl(url: string): Promise<string | null> {
     const req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.responseType = "blob";
-    req.addEventListener("load", function() {
+    req.addEventListener("load", function () {
       const reader = new FileReader();
       reader.onloadend = () => {
         _dataUrlCache.set(url, reader.result);
@@ -113,7 +112,7 @@ browser.runtime.onInstalled.addListener(async () => {
       focusOnSearchKeybinds: ["ctrl+'"],
       selectNextSortKeybinds: [],
       selectPrevSortKeybinds: [],
-      deactivateKeybinds: ["esc"]
+      deactivateKeybinds: ["esc"],
     }).forEach(([key, value]) => {
       browser.storage.local.set({ [`cnf-${key}`]: value });
     });
@@ -124,14 +123,14 @@ browser.runtime.onInstalled.addListener(async () => {
     }
     const url = browser.runtime.getURL("options.html");
     browser.tabs.create({
-      url: `${url}${message ? `?message=${message}` : ""}`
+      url: `${url}${message ? `?message=${message}` : ""}`,
     });
   }
 
   if (version < 2) {
     Object.entries({
       version: 2,
-      theme: "light"
+      theme: "light",
     }).forEach(([key, value]) => {
       browser.storage.local.set({ [`cnf-${key}`]: value });
     });
@@ -140,17 +139,17 @@ browser.runtime.onInstalled.addListener(async () => {
 
 browser.runtime.onStartup.addListener(async () => {
   await Promise.all(
-    [State.ActivatedTabIds].map(state => {
+    [State.ActivatedTabIds].map((state) => {
       clearState(state);
     })
   );
 });
 
-browser.tabs.onActivated.addListener(async activeInfo => {
+browser.tabs.onActivated.addListener(async (activeInfo) => {
   setActivatedTabIds(union([activeInfo.tabId].concat(getActivatedTabIds())));
 });
 
-browser.tabs.onRemoved.addListener(async tabId => {
+browser.tabs.onRemoved.addListener(async (tabId) => {
   setActivatedTabIds(without(getActivatedTabIds(), tabId));
 });
 
@@ -169,20 +168,20 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 
       const getSortedTabs = async <T extends Tab>(tabs: T[]): Promise<T[]> => {
         const getTabsMap = (): Map<number | string, T> => {
-          return new Map(tabs.map(tab => [tab.id, tab]));
+          return new Map(tabs.map((tab) => [tab.id, tab]));
         };
 
         const getTabsInActiveOrder = async (): Promise<T[]> => {
           const tabsMap = getTabsMap();
           return union(
             (getActivatedTabIds() as (number | string)[]).concat(
-              tabs.map(tab => tab.id)
+              tabs.map((tab) => tab.id)
             )
           )
-            .map(id => {
+            .map((id) => {
               return tabsMap.get(id);
             })
-            .filter(tab => {
+            .filter((tab) => {
               return tab != null;
             });
         };
@@ -194,12 +193,12 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
             const tabsInActivateOrder = await getTabsInActiveOrder();
             const tabsByHosts = groupBy(
               tabsInActivateOrder,
-              tab => new URL(tab.url).hostname
+              (tab) => new URL(tab.url).hostname
             );
             const hosts = union(
-              tabsInActivateOrder.map(tab => new URL(tab.url).hostname)
+              tabsInActivateOrder.map((tab) => new URL(tab.url).hostname)
             );
-            return hosts.flatMap(host => {
+            return hosts.flatMap((host) => {
               return tabsByHosts[host];
             });
           case Sort.Title:
@@ -221,20 +220,20 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
             tabs = tabs.filter(doesContainQuery);
           }
           tabs = await getSortedTabs(tabs);
-          return tabs.map(tab =>
+          return tabs.map((tab) =>
             pick(tab, ["id", "title", "url", "favIconUrl"])
           );
         }
 
         case Panel.Closed: {
           let tabs = (await browser.sessions.getRecentlyClosed())
-            .filter(session => session.tab)
-            .map(session => ({
+            .filter((session) => session.tab)
+            .map((session) => ({
               id: session.tab.sessionId,
               title: session.tab.title,
               url: session.tab.url,
               favIconUrl: session.tab.favIconUrl,
-              windowId: session.tab.windowId
+              windowId: session.tab.windowId,
             }));
           if (message.query) {
             tabs = tabs.filter(doesContainQuery);
@@ -246,14 +245,14 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
           const searchable = message.query.length >= 3;
           let items = await browser.history.search({
             text: searchable ? message.query : "",
-            maxResults: MAX_HISTORY_RESULT
+            maxResults: MAX_HISTORY_RESULT,
           });
           if (!searchable) {
             items = items.filter(doesContainQuery);
           }
           items = await getSortedTabs(items);
           return await Promise.all(
-            items.map(async item =>
+            items.map(async (item) =>
               Object.assign(
                 { favIconUrl: await toDataUrl(`chrome://favicon/${item.url}`) },
                 pick(item, ["id", "title", "url"])

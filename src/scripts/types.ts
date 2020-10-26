@@ -8,7 +8,7 @@ export enum Method {
   GetConfig,
   GetStyle,
   CloseTab,
-  GetFaviconDataUrl
+  GetFaviconDataUrl,
 }
 
 export enum Sort {
@@ -16,13 +16,13 @@ export enum Sort {
   ActiveHost,
   Normal,
   Title,
-  Url
+  Url,
 }
 
 export enum Panel {
   Opening,
   Closed,
-  History
+  History,
 }
 
 export interface Message {

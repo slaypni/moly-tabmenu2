@@ -1,7 +1,7 @@
 import hotkeys, { KeyHandler } from "hotkeys-js";
 import { isEqual, union } from "lodash-es";
-import { h, render, Fragment, Ref } from "preact";
-import { useEffect, useState, useRef } from "preact/hooks";
+import { Fragment, h, Ref, render } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { browser } from "webextension-polyfill-ts";
 
 const keyNames = {
@@ -44,14 +44,14 @@ const keyNames = {
   219: "[",
   220: "\\",
   221: "]",
-  222: "'"
+  222: "'",
 };
 
 enum Mod {
   Meta = "command",
   Ctrl = "ctrl",
   Alt = "alt",
-  Shift = "shift"
+  Shift = "shift",
 }
 
 function App() {
@@ -84,7 +84,7 @@ function App() {
         [{ focusOnSearchKeybinds }, setFocusOnSearchKeybinds],
         [{ selectNextSortKeybinds }, setSelectNextSortKeybinds],
         [{ selectPrevSortKeybinds }, setSelectPrevSortKeybinds],
-        [{ deactivateKeybinds }, setDeactivateKeybinds]
+        [{ deactivateKeybinds }, setDeactivateKeybinds],
       ]) {
         const key = `cnf-${Object.keys(kv)[0]}`;
         const value = Object.values(kv)[0];
@@ -106,7 +106,7 @@ function App() {
     focusOnSearchKeybinds,
     selectNextSortKeybinds,
     selectPrevSortKeybinds,
-    deactivateKeybinds
+    deactivateKeybinds,
   })) {
     useEffect(() => {
       if (!initialized) return;
@@ -141,7 +141,7 @@ function App() {
             <div class="content pure-u-3-5">
               <select
                 value={mouseModButton || "disable"}
-                onInput={e => {
+                onInput={(e) => {
                   const value = (e.target as HTMLSelectElement).value;
                   setMouseModButton(value != "disable" ? value : null);
                 }}
@@ -162,7 +162,7 @@ function App() {
             <div class="content pure-u-3-5">
               <select
                 value={modKey}
-                onInput={e => {
+                onInput={(e) => {
                   setModKey((e.target as HTMLSelectElement).value);
                 }}
               >
@@ -183,7 +183,7 @@ function App() {
             <div class="content pure-u-3-5">
               <select
                 value={theme || "light"}
-                onInput={e => {
+                onInput={(e) => {
                   setTheme((e.target as HTMLSelectElement).value);
                 }}
               >
@@ -205,56 +205,56 @@ function App() {
             label: "Select next item",
             keybinds: moveDownKeybinds,
             setKeybinds: setMoveDownKeybinds,
-            mod: true
+            mod: true,
           },
           {
             label: "Select previous item",
             keybinds: moveUpKeybinds,
             setKeybinds: setMoveUpKeybinds,
-            mod: true
+            mod: true,
           },
           {
             label: "Move to right pane",
             keybinds: moveRightKeybinds,
             setKeybinds: setMoveRightKeybinds,
-            mod: true
+            mod: true,
           },
           {
             label: "Move to left pane",
             keybinds: moveLeftKeybinds,
             setKeybinds: setMoveLeftKeybinds,
-            mod: true
+            mod: true,
           },
           {
             label: "Close selected tab",
             keybinds: closeItemKeybinds,
             setKeybinds: setCloseItemKeybinds,
-            mod: true
+            mod: true,
           },
           {
             label: "Focus on search box",
             keybinds: focusOnSearchKeybinds,
             setKeybinds: setFocusOnSearchKeybinds,
-            mod: false
+            mod: false,
           },
           {
             label: "Select next sort option",
             keybinds: selectNextSortKeybinds,
             setKeybinds: setSelectNextSortKeybinds,
-            mod: false
+            mod: false,
           },
           {
             label: "Select previous sort option",
             keybinds: selectPrevSortKeybinds,
             setKeybinds: setSelectPrevSortKeybinds,
-            mod: false
+            mod: false,
           },
           {
             label: "Close menu",
             keybinds: deactivateKeybinds,
             setKeybinds: setDeactivateKeybinds,
-            mod: false
-          }
+            mod: false,
+          },
         ].map(({ label, keybinds, setKeybinds, mod }) => (
           <fieldset>
             <div class="item pure-g">
@@ -282,26 +282,26 @@ function BindButton({
   setKeybind,
   isActive,
   setIsActive,
-  elementRef
+  elementRef,
 }: {
   modKey: string | null;
   keybind: string | null;
   setKeybind: (keybind: string | null) => void;
   isActive: boolean;
   setIsActive: (isActive: boolean) => void;
-  elementRef: Ref<HTMLElement | null>;
+  elementRef: Ref<HTMLButtonElement | null>;
 }) {
-  const deleteButtonElementRef = useRef<HTMLElement | null>(null);
+  const deleteButtonElementRef = useRef<HTMLButtonElement | null>(null);
   const splitKey = "+";
 
   const sanitize = (bind: string): string =>
     bind
       .split(splitKey)
-      .filter(key => key !== modKey)
+      .filter((key) => key !== modKey)
       .join(splitKey);
 
   useEffect(() => {
-    const handler: KeyHandler = event => {
+    const handler: KeyHandler = (event) => {
       if (!isActive) return;
       const key = event.key.toLowerCase();
       if (["meta", "control", "alt", "shift"].includes(key)) return;
@@ -384,14 +384,14 @@ function BindButton({
 function BindButtons({
   modKey,
   keybinds,
-  setKeybinds
+  setKeybinds,
 }: {
   modKey: string | null;
   keybinds: string[];
   setKeybinds: (keybinds: string[]) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const activeButtonElementRef = useRef<HTMLElement | null>(null);
+  const activeButtonElementRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     const newbinds = union(keybinds);
