@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Moly Tab Menu",
-  "version": "1.1.2",
+  "version": "1.1.3",
 
   "description": "Switch tabs more efficiently.",
 
@@ -21,11 +21,11 @@
   ],
 
   "background": {
-    "scripts": ["scripts/background.ts"],
-    "persistent": true
+    "service_worker": "scripts/background.ts",
+    "type": "module"
   },
 
   "options_ui": { "page": "options.html", "open_in_tab": true },
 
-  "permissions": ["tabs", "storage", "sessions", "history", "chrome://favicon/"]
+  "permissions": ["tabs", "storage", "sessions", "history", "favicon"]
 }

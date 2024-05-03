@@ -2,7 +2,6 @@ import hotkeys, { KeyHandler } from "hotkeys-js";
 import { isEqual, union } from "lodash-es";
 import { Fragment, h, Ref, render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { browser } from "webextension-polyfill-ts";
 
 const keyNames = {
   8: "backspace",
@@ -71,7 +70,7 @@ function App() {
 
   useEffect(() => {
     (async () => {
-      const cnf = await browser.storage.local.get();
+      const cnf = await chrome.storage.local.get();
       for (let [kv, setState] of [
         [{ mouseModButton }, setMouseModButton],
         [{ modKey }, setModKey],
@@ -110,7 +109,7 @@ function App() {
   })) {
     useEffect(() => {
       if (!initialized) return;
-      browser.storage.local.set({ [`cnf-${key}`]: value });
+      chrome.storage.local.set({ [`cnf-${key}`]: value });
     }, [value]);
   }
 

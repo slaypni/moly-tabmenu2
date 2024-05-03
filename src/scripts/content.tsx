@@ -361,8 +361,12 @@ function App() {
   }, [config]);
 
   useEffect(() => {
-    chrome.runtime.sendMessage({ method: Method.GetConfig }, setConfig);
-    chrome.runtime.sendMessage({ method: Method.GetStyle }, setStyle);
+    chrome.runtime.sendMessage({ method: Method.GetConfig }, (res) => {
+      setConfig(res);
+    });
+    chrome.runtime.sendMessage({ method: Method.GetStyle }, (res) => {
+      setStyle(res);
+    });
   }, []);
 
   const getPanelElement = (p: Panel, name: string): JSX.Element => {
