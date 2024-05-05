@@ -55,14 +55,15 @@ async function setState(name: string, value: any): Promise<void> {
   return await chrome.storage.local.set({ [`st-${name}`]: value });
 }
 
-let _activatedTabIds: number[] = [];
-
-function getActivatedTabIds(): number[] {
-  return [..._activatedTabIds];
+async function getActivatedTabIds(): Promise<number[]> {
+  return (
+    (await chrome.storage.session.get("activatedTabIds"))["activatedTabIds"] ??
+    []
+  );
 }
 
-function setActivatedTabIds(value: number[]): void {
-  _activatedTabIds = [...value];
+async function setActivatedTabIds(value: number[]): Promise<void> {
+  await chrome.storage.session.set({ activatedTabIds: [...value] });
 }
 
 const _dataUrlCache = new LRUMap(MAX_FAVICON_DATA_CACHE);
@@ -157,11 +158,13 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  setActivatedTabIds(union([activeInfo.tabId].concat(getActivatedTabIds())));
+  setActivatedTabIds(
+    union([activeInfo.tabId].concat(await getActivatedTabIds()))
+  );
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
-  setActivatedTabIds(without(getActivatedTabIds(), tabId));
+  setActivatedTabIds(without(await getActivatedTabIds(), tabId));
 });
 
 chrome.runtime.onMessage.addListener(
@@ -189,7 +192,7 @@ chrome.runtime.onMessage.addListener(
             const getTabsInActiveOrder = async (): Promise<T[]> => {
               const tabsMap = getTabsMap();
               return union(
-                (getActivatedTabIds() as (number | string)[]).concat(
+                ((await getActivatedTabIds()) as (number | string)[]).concat(
                   tabs.map((tab) => tab.id)
                 )
               )
